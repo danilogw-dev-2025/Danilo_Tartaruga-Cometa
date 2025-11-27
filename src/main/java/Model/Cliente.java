@@ -1,8 +1,5 @@
 package Model;
 
-
-import java.io.Serial;
-
 public class Cliente {
 
     private Long idCliente;
