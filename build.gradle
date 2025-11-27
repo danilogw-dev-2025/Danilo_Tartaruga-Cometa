@@ -1,0 +1,30 @@
+plugins {
+    id 'java'
+    id 'war'
+}
+
+group = 'com.github.danilomendes'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // A API de Servlets
+    compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
+
+    // A API de JSP
+    compileOnly 'javax.servlet.jsp:javax.servlet.jsp-api:2.3.3'
+
+    // O Driver do PostgreSQL (vai dentro do WAR)
+    implementation 'org.postgresql:postgresql:42.7.3'
+}
+
+test {
+    useJUnitPlatform()
+}
