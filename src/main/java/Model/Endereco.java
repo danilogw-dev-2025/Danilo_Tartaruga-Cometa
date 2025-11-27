@@ -25,6 +25,18 @@ public class Endereco {
         this.numeroCasa = numeroCasa;
     }
 
+    // construtor completo (para SELECT)
+    public Endereco(Long idEndereco, Long idCliente, String estado, String cidade, String bairro, String rua, String cep, int numeroCasa) {
+        this.idEndereco = idEndereco;
+        this.idCliente = idCliente;
+        this.estado = estado;
+        this.cidade = cidade;
+        this.bairro = bairro;
+        this.rua = rua;
+        this.cep = cep;
+        this.numeroCasa = numeroCasa;
+    }
+
     public Long getIdCliente() {
         return idCliente;
     }
@@ -73,7 +85,7 @@ public class Endereco {
         this.rua = rua;
     }
 
-    public String getCEP() {
+    public String getCep() {
         return cep;
     }
 

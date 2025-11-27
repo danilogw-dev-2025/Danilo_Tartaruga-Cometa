@@ -22,6 +22,18 @@ public class Cliente {
         this.dataNascimento = dataNascimento;
         this.email = email;
         this.senha = senha;
+
+    }
+
+    public Cliente (Long idCliente, String codigoCliente, String nome, String cpf, String dataNascimento, String email, String senha) {
+        this.idCliente = idCliente;
+        this.codigoCliente = codigoCliente;
+        this.nome = nome;
+        this.cpf = cpf;
+        this.dataNascimento = dataNascimento;
+        this.email = email;
+        this.senha = senha;
+        this.idCliente = idCliente;
     }
 
     public Long getIdCliente() {
