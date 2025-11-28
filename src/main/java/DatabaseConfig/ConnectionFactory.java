@@ -5,13 +5,18 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class ConnectionFactory {
-    private static final String URL = "jdbc:postgresql://localhost:5432/nomedobanco"; // Alterar o nome do banco de dados
-    private static final String USER = "postgresql";
-    private static final String PASSWORD = "postgresql";
+    private static final String URL = "jdbc:postgresql://localhost:5432/trilhaGW"; // Alterar o nome do banco de dados
+    private static final String USER = "postgres";
+    private static final String PASSWORD = "postgres";
 
     public static Connection getConnection() {
         try {
+            // FORÇA o carregamento do driver do PostgreSQL
+            Class.forName("org.postgresql.Driver");
+
             return DriverManager.getConnection(URL, USER, PASSWORD);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("Driver do PostgreSQL não encontrado: " + e.getMessage(), e);
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao conectar ao banco de dados", e);
         }
