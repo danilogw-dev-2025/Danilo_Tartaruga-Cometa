@@ -8,32 +8,32 @@ public class Cliente {
     private String cpf;
     private String dataNascimento;
     private String email;
-    private String senha;
+
 
     public Cliente() {
 
     }
 
-    public Cliente (String codigoCliente, String nome, String cpf, String dataNascimento, String email, String senha) {
+
+    public Cliente (String codigoCliente, String nome, String cpf, String dataNascimento, String email) {
         this.codigoCliente = codigoCliente;
         this.nome = nome;
         this.cpf = cpf;
         this.dataNascimento = dataNascimento;
         this.email = email;
-        this.senha = senha;
 
     }
 
-    public Cliente (Long idCliente, String codigoCliente, String nome, String cpf, String dataNascimento, String email, String senha) {
+    public Cliente(Long idCliente, String codigoCliente, String nome, String cpf, String dataNascimento, String email) {
         this.idCliente = idCliente;
         this.codigoCliente = codigoCliente;
         this.nome = nome;
         this.cpf = cpf;
         this.dataNascimento = dataNascimento;
         this.email = email;
-        this.senha = senha;
-        this.idCliente = idCliente;
     }
+
+
 
     public Long getIdCliente() {
         return idCliente;
@@ -83,14 +83,6 @@ public class Cliente {
         this.email = email;
     }
 
-    public String getSenha() {
-        return senha;
-    }
-
-    public void setSenha(String senha) {
-        this.senha = senha;
-
-    }
 
     public String toString() {
         return "ID_CLIENTE: " + this.idCliente + ", Codigo do Cliente: " + this.codigoCliente + ", Nome: " + this.nome + ", CPF: " + this.cpf + "," +
