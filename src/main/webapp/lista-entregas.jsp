@@ -19,8 +19,10 @@
 <body>
 
 <h1>Lista de Entregas</h1>
-<a href="form-entrega.jsp">Cadastrar nova entrega</a><br><br>
-
+<a href="nova-entrega">Cadastrar nova entrega</a>
+<br><br>
+<a href="<%= request.getContextPath() %>/menu">Voltar ao Menu Principal</a>
+<br><br>
 <%
     List<Entrega> lista = (List<Entrega>) request.getAttribute("listaEntregas");
 %>

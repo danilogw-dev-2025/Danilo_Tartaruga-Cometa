@@ -73,40 +73,6 @@ public class EntregaServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/listar-entregas");
 
 
-//        pw.println("<!DOCTYPE html>");
-//        pw.println("<html>");
-//        pw.println("<head>");
-//        pw.println("  <meta charset='UTF-8'>");
-//        pw.println("  <title>Resumo da Entrega</title>");
-//        pw.println("  <style>");
-//        pw.println("    body { font-family: Arial, sans-serif; }");
-//        pw.println("    h1 { color: #333; }");
-//        pw.println("    table { border-collapse: collapse; margin-top: 20px; }");
-//        pw.println("    th, td { border: 1px solid #ccc; padding: 8px 12px; }");
-//        pw.println("    th { background-color: #f2f2f2; text-align: left; }");
-//        pw.println("  </style>");
-//        pw.println("</head>");
-//        pw.println("<body>");
-//
-//        pw.println("<h1>Entrega cadastrada com sucesso!</h1>");
-//
-//        pw.println("<table>");
-//        pw.println("  <tr><th>Campo</th><th>Valor</th></tr>");
-//        pw.println("  <tr><td>Transportadora</td><td>" + transportadora + "</td></tr>");
-//        pw.println("  <tr><td>Código do Pedido</td><td>" + codigo_pedido + "</td></tr>");
-//        pw.println("  <tr><td>ID do Cliente</td><td>" + id_cliente + "</td></tr>");
-//        pw.println("  <tr><td>ID do Produto</td><td>" + id_produto + "</td></tr>");
-//        pw.println("  <tr><td>Data de Envio</td><td>" + data_envio + "</td></tr>");
-//        pw.println("  <tr><td>Data de Entrega</td><td>" + data_entrega + "</td></tr>");
-//        pw.println("  <tr><td>Valor do Frete</td><td>" + valor_frete + "</td></tr>");
-//
-//        pw.println("</table>");
-//
-//        pw.println("<br><a href='form-entrega.jsp'>Voltar ao formulário</a>");
-//
-//        pw.println("</body>");
-//        pw.println("</html>");
-
     }
 
     //retira o servlet de serviço
