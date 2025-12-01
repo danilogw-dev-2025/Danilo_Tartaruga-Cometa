@@ -23,7 +23,7 @@ public class ProdutoDAO {
             stmt.setString(2, produto.getNomeProduto());
             stmt.setString(3, produto.getDescricao());
             stmt.setBigDecimal(4, produto.getPreco());
-            stmt.setInt(5, produto.getQuantidade());
+            stmt.setLong(5, produto.getQuantidade());
 
             stmt.executeUpdate();
 
@@ -41,17 +41,12 @@ public class ProdutoDAO {
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-
                 Long idProduto = rs.getLong("ID_PRODUTO");
-
-                // CODIGO_PRODUTO é CHAR(30) -> converto para int (assumindo que só tem número)
-                String codigoProdutoStr = rs.getString("CODIGO_PRODUTO").trim();
-                int codigoProduto = Integer.parseInt(codigoProdutoStr);
-
+                String codigoProduto = rs.getString("CODIGO_PRODUTO").trim(); // <-- String, sem parseInt
                 String nomeProduto = rs.getString("NOME_PRODUTO");
                 String descricao = rs.getString("DESCRICAO");
                 BigDecimal preco = rs.getBigDecimal("PRECO_PRODUTO");
-                int quantidade = rs.getInt("QUANTIDADE");
+                Long quantidade = rs.getLong("QUANTIDADE");
 
                 Produto produto = new Produto(
                         codigoProduto,
@@ -60,7 +55,6 @@ public class ProdutoDAO {
                         preco,
                         quantidade
                 );
-                // setar o ID gerado pelo banco
                 produto.setIdProduto(idProduto);
 
                 produtos.add(produto);

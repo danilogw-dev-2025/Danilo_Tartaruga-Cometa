@@ -5,17 +5,27 @@ import java.math.BigDecimal;
 public class Produto {
 
     private Long idProduto;
-    private int codigoProduto;
+    private String codigoProduto;
     private String nomeProduto;
     private String descricao;
     private BigDecimal preco;
-    private int quantidade;
+    private Long quantidade;
 
     public  Produto() {
 
     }
+        //cadastro
+    public Produto(String codigoProduto, String nomeProduto, String descricao, BigDecimal preco, Long quantidade) {
+        this.codigoProduto = codigoProduto;
+        this.nomeProduto = nomeProduto;
+        this.descricao = descricao;
+        this.preco = preco;
+        this.quantidade = quantidade;
+    }
 
-    public Produto(int codigoProduto, String nomeProduto, String descricao, BigDecimal preco, int quantidade) {
+    //select
+    public Produto(Long idProduto, String codigoProduto, String nomeProduto, String descricao, BigDecimal preco, Long quantidade) {
+        this.idProduto = idProduto;
         this.codigoProduto = codigoProduto;
         this.nomeProduto = nomeProduto;
         this.descricao = descricao;
@@ -31,11 +41,11 @@ public class Produto {
         this.idProduto = idProduto;
     }
 
-    public int getCodigoProduto() {
+    public String getCodigoProduto() {
         return codigoProduto;
     }
 
-    public void setCodigoProduto(int codigoProduto) {
+    public void setCodigoProduto(String codigoProduto) {
         this.codigoProduto = codigoProduto;
     }
 
@@ -63,11 +73,11 @@ public class Produto {
         this.preco = preco;
     }
 
-    public int getQuantidade() {
+    public Long getQuantidade() {
         return quantidade;
     }
 
-    public void setQuantidade(int quantidade) {
+    public void setQuantidade(Long quantidade) {
         this.quantidade = quantidade;
     }
 
