@@ -6,24 +6,28 @@ plugins {
 group = 'com.github.danilomendes'
 version = '1.0-SNAPSHOT'
 
+// <<< MUITO IMPORTANTE: NADA de bloco "java { }" aqui >>>
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    // JUnit 5 simples, sem BOM
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
 
-    // A API de Servlets
+    // A API de Servlets (Tomcat fornece no runtime)
     compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
 
     // A API de JSP
     compileOnly 'javax.servlet.jsp:javax.servlet.jsp-api:2.3.3'
 
-    // O Driver do PostgreSQL (vai dentro do WAR)
+    // O Driver do PostgreSQL
     implementation 'org.postgresql:postgresql:42.7.3'
 }
+
 
 test {
     useJUnitPlatform()

@@ -12,11 +12,9 @@ import java.util.List;
 
 public class ClienteDAO {
 
-    // Salvar usando PreparedStatement e 'INSERT'
-    // Listar usando 'ResultSet' e 'SELECT'
     public void cadastrarCliente(Cliente cliente) {
-        String sql = "INSERT INTO TB_CLIENTE (CODIGO_CLIENTE, NOME, CPF, DATA_NASCIMENTO, EMAIL, SENHA) " +
-                "VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO TB_CLIENTE (CODIGO_CLIENTE, NOME, CPF, DATA_NASCIMENTO, EMAIL) " +
+                "VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -26,7 +24,6 @@ public class ClienteDAO {
             stmt.setString(3, cliente.getCpf());
             stmt.setDate(4, java.sql.Date.valueOf(cliente.getDataNascimento())); // String -> Date (yyyy-MM-dd)
             stmt.setString(5, cliente.getEmail());
-            stmt.setString(6, cliente.getSenha());
             stmt.executeUpdate();
 
         } catch (SQLException e) {
@@ -51,8 +48,7 @@ public class ClienteDAO {
                         rs.getString("NOME"),
                         rs.getString("CPF"),
                         dataNasc != null ? dataNasc.toString() : null,  // Conversão de Date para String
-                        rs.getString("EMAIL"),
-                        rs.getString("SENHA")
+                        rs.getString("EMAIL")
                 );
 
                 clientes.add(cliente);
