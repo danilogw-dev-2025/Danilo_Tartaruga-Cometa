@@ -38,6 +38,8 @@
         <th>CPF</th>
         <th>Data de Nascimento</th>
         <th>Email</th>
+        <th>Editar</th>
+        <th>Excluir</th>
     </tr>
 
     <% if (lista != null && !lista.isEmpty()) {
@@ -49,11 +51,22 @@
             <td><%= c.getCpf() %></td>
             <td><%= c.getDataNascimento() %></td>
             <td><%= c.getEmail() %></td>
+            <td>
+                <a href="<%= request.getContextPath() %>/cliente-servlet?action=editar&id=<%= c.getIdCliente() %>">Editar</a>
+                </td>
+
+                <td>
+              <a href="<%= request.getContextPath() %>/cliente-servlet?action=delete&idCliente=<%= c.getIdCliente() %>"
+                 onclick="return confirm('Deseja realmente excluir?');">
+                 Excluir
+              </a>
+            </td>
+
         </tr>
     <%   }
        } else { %>
         <tr>
-            <td colspan="6">Nenhum cliente registrado.</td>
+            <td colspan="8">Nenhum cliente registrado.</td>
         </tr>
     <% } %>
 </table>

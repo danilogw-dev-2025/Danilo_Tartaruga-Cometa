@@ -37,6 +37,8 @@
         <th>Data Entrega</th>
         <th>Transportadora</th>
         <th>Valor Frete</th>
+        <th>Editar</th>
+        <th>Deletar</th>
     </tr>
 
     <% if (lista != null && !lista.isEmpty()) {
@@ -50,11 +52,22 @@
                    <td><%= e.getDataEntrega() %></td>
                    <td><%= e.getTransportadora() %></td>
                    <td><%= e.getValorFrete() %></td>
+                   <td>
+                       <a href="<%= request.getContextPath() %>/entrega-servlet?action=editar&idEntrega=<%= e.getIdEntrega() %>">Editar</a>
+                   </td>
+
+                   <td>
+                       <a href="<%= request.getContextPath() %>/entrega-servlet?action=delete&idEntrega=<%= e.getIdEntrega() %>"
+                          onclick="return confirm('Deseja realmente excluir?');">
+                          Excluir
+                          </a>
+                   </td>
+
                </tr>
     <%     }
        } else { %>
            <tr>
-               <td colspan="8">Nenhuma entrega cadastrada.</td>
+               <td colspan="10">Nenhuma entrega cadastrada.</td>
            </tr>
     <% } %>
 </table>

@@ -1,0 +1,80 @@
+<%@ page contentType="text/html; charset=UTF-8" language="java" %>
+<%@ page import="java.util.List" %>
+<%@ page import="Model.Cliente" %>
+<%@ page import="Model.Produto" %>
+
+<%
+    List<Cliente> listaClientes = (List<Cliente>) request.getAttribute("listaClientes");
+    List<Produto> listaProdutos = (List<Produto>) request.getAttribute("listaProdutos");
+%>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Entrega</title>
+</head>
+<body>
+<h1>Editar Entrega</h1>
+<a href="listar-entregas">Voltar para lista de Entregas</a>
+<br><br>
+
+<a href="<%= request.getContextPath() %>/menu">Voltar ao Menu Principal</a>
+<br><br>
+
+<form method="post" action="entrega-servlet">
+    <input type="hidden" name="idEntrega" value="${entrega.idEntrega}">
+
+    <!-- SELECT de CLIENTE -->
+        <label for="id_cliente">Cliente:</label>
+        <select id="id_cliente" name="id_cliente" value="${entrega.idCliente}" required /><br>
+            <option value="">-- Selecione --</option>
+            <% if (listaClientes != null) {
+                   for (Cliente c : listaClientes) { %>
+                       <option value="<%= c.getIdCliente() %>">
+                           <%= c.getIdCliente() %> - <%= c.getNome() %>
+                       </option>
+            <%     }
+               } %>
+        </select>
+        <br><br>
+
+        <!-- SELECT de PRODUTO -->
+            <label for="id_produto">Produto:</label>
+            <select id="id_produto" name="id_produto" value="${entrega.idProduto}" required /><br>
+                <option value="">-- Selecione --</option>
+                <% if (listaProdutos != null) {
+                       for (Produto p : listaProdutos) { %>
+                           <option value="<%= p.getIdProduto() %>">
+                               <%= p.getIdProduto() %> - <%= p.getNomeProduto() %>
+                           </option>
+                <%     }
+                   } %>
+            </select>
+            <br><br>
+
+    <label for="transportadora">Transportadora:</label>
+        <input type="text" id="transportadora" name="transportadora" value="${entrega.transportadora}" required />
+    <br><br>
+
+    <label for="codigo_pedido">Codigo do pedido:</label>
+        <input type="text" id="codigo_pedido" name="codigo_pedido" value="${entrega.codigoPedido}" required />
+     <br><br>
+
+      <label for="data_envio">Data de Envio:</label>
+             <input type="date" id="data_envio" name="data_envio" value="${entrega.dataEnvio}" required />
+      <br><br>
+
+      <label for="data_entrega">Data de Entrega:</label>
+              <input type="date" id="data_entrega" name="data_entrega" value="${entrega.dataEntrega}" required />
+      <br><br>
+
+      <label for="valor_frete">Valor do Frete:</label>
+               <input type="number" id="valor_frete" name="valor_frete" min= "0.01" step="0.01" placeholder="R$ 0,00" value="${entrega.valorFrete}" required />
+      <br><br>
+        <br><br>
+        <input type="submit" value="Enviar" />
+</form>
+
+</body>
+</html>

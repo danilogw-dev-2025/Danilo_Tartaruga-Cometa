@@ -2,6 +2,7 @@ package Servlet;
 
 //ProdutoServlet → @WebServlet("/produto") (salvar)
 
+import DAO.ClienteDAO;
 import DAO.ProdutoDAO;
 import Model.Produto;
 
@@ -24,18 +25,60 @@ public class ProdutoServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        resp.setContentType("text/html;charset=UTF-8");
-        resp.getWriter().println("<h1>Olá, Tomcat + Gradle + Java 8!</h1>");
+        String ipParam = request.getParameter("idProduto");
+        String action = request.getParameter("action");
+
+        if ("delete".equals(action)) {
+            deletarProduto(request, response);
+            return;
+        }
+
+        if (ipParam ==  null || ipParam.isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/listar-produtos");
+            return;
+        }
+
+        try {
+            Long idProduto = Long.parseLong(ipParam);
+
+            ProdutoDAO produtoDAO = new ProdutoDAO();
+            Produto produto = produtoDAO.buscarPorId(idProduto);
+
+            if (produto == null) {
+                response.sendRedirect(request.getContextPath() + "/listar-produtos");
+                return;
+            }
+
+            request.setAttribute("produto", produto);
+            request.getRequestDispatcher("/editar-produtos.jsp")
+                    .forward(request, response);
+
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath());
+        }
     }
+
+    private void deletarProduto(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+
+        Long idProduto = Long.parseLong(request.getParameter("idProduto"));
+
+        ProdutoDAO dao = new ProdutoDAO();
+        dao.deletarProduto(idProduto);
+
+        response.sendRedirect(request.getContextPath() + "/listar-produtos");
+    }
+
 
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("text/html");
 
-        PrintWriter pw = response.getWriter();
+        String idStr = request.getParameter("idProduto");
+//        PrintWriter pw = response.getWriter();
 
         String codigoProduto = request.getParameter("codigoProduto");
         String nomeProduto = request.getParameter("nomeProduto");
@@ -55,7 +98,15 @@ public class ProdutoServlet extends HttpServlet {
         );
 
         ProdutoDAO produtoDAO = new ProdutoDAO();
-        produtoDAO.cadastrarProduto(produto);
+
+        if (idStr != null && !idStr.isEmpty()) {
+            Long idProduto = Long.parseLong(idStr);
+            produto.setIdProduto(idProduto);
+            produtoDAO.editarProdutos(produto);
+        }
+        else {
+            produtoDAO.cadastrarProduto(produto);
+        }
 
         response.sendRedirect(request.getContextPath() + "/listar-produtos");
     }
