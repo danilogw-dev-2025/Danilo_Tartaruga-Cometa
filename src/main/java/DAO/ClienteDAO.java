@@ -58,4 +58,93 @@ public class ClienteDAO {
         }
         return clientes;
     }
+
+    public Cliente buscarPorId(Long idCliente) {
+        String sql = "SELECT ID_CLIENTE, CODIGO_CLIENTE, NOME, CPF, DATA_NASCIMENTO, EMAIL " +
+                "FROM TB_CLIENTE " +
+                "WHERE ID_CLIENTE = ?";
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setLong(1, idCliente);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Cliente cliente = new Cliente();
+
+                    cliente.setIdCliente(rs.getLong("ID_CLIENTE"));
+                    cliente.setCodigoCliente(rs.getString("CODIGO_CLIENTE"));
+                    cliente.setNome(rs.getString("NOME"));
+                    cliente.setCpf(rs.getString("CPF"));
+
+                    // Conversão de java.sql.Date -> String
+                    java.sql.Date dataSql = rs.getDate("DATA_NASCIMENTO");
+                    String dataString = (dataSql != null) ? dataSql.toString() : null;
+                    cliente.setDataNascimento(dataString);
+
+                    cliente.setEmail(rs.getString("EMAIL"));
+
+                    return cliente; // <-- retorna o objeto aqui
+                } else {
+                    return null; // <-- não encontrado
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar cliente por ID", e);
+        }
+    }
+
+
+    public boolean editarCliente(Cliente cliente) {
+        String sql = "UPDATE TB_CLIENTE SET CODIGO_CLIENTE = ?, NOME = ?, CPF = ?, DATA_NASCIMENTO = ?, EMAIL = ? " +
+                "WHERE ID_CLIENTE = ?";
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, cliente.getCodigoCliente());
+            stmt.setString(2, cliente.getNome());
+            stmt.setString(3, cliente.getCpf());
+
+            // Trata a data como String, Convertendo para java.sql.Date
+            if (cliente.getDataNascimento() != null && !cliente.getDataNascimento().isEmpty()) {
+                stmt.setDate(4, java.sql.Date.valueOf(cliente.getDataNascimento()));
+            } else {
+                stmt.setNull(4, java.sql.Types.DATE);
+            }
+
+            stmt.setString(5, cliente.getEmail());
+            stmt.setLong(6, cliente.getIdCliente());
+
+            int linhasAfetadas = stmt.executeUpdate();
+
+            // Se nenhuma linha for atualizada, retorna false
+            return linhasAfetadas > 0;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao atualizar cliente: " + e.getMessage(), e);
+        }
+    }
+
+
+
+    public boolean deletarCliente(Long idCliente) {
+        String sql = "DELETE FROM TB_CLIENTE WHERE id_cliente = ?";
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setLong(1, idCliente);
+
+            return stmt.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao excluir cliente: " + e.getMessage(), e);
+        }
+    }
+
+
+
 }

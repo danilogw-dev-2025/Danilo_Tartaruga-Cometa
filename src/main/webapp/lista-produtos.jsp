@@ -37,6 +37,8 @@
         <th>Descrição</th>
         <th>Preço</th>
         <th>Quantidade</th>
+        <th>Editar</th>
+        <th>Excluir</th>
     </tr>
 
     <% if (lista != null && !lista.isEmpty()) {
@@ -48,11 +50,21 @@
             <td><%= c.getDescricao() %></td>
             <td><%= c.getPreco() %></td>
             <td><%= c.getQuantidade() %></td>
+            <td>
+                <a href="<%= request.getContextPath() %>/produto-servlet?action=editar&idProduto=<%= c.getIdProduto() %>">Editar</a>
+                </td>
+
+                <td>
+                 <a href="<%= request.getContextPath() %>/produto-servlet?action=delete&idProduto=<%= c.getIdProduto() %>"
+                    onclick="return confirm('Deseja realmente excluir?');">
+                    Excluir
+                    </a>
+            </td>
         </tr>
     <%   }
        } else { %>
         <tr>
-            <td colspan="6">Nenhum Produto registrado.</td>
+            <td colspan="8">Nenhum Produto registrado.</td>
         </tr>
     <% } %>
 </table>

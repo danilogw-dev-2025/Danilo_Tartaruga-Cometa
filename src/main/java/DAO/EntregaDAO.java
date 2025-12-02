@@ -1,6 +1,7 @@
 package DAO;
 
 import DatabaseConfig.ConnectionFactory;
+import Model.Cliente;
 import Model.Entrega;
 
 import java.math.BigDecimal;
@@ -73,5 +74,93 @@ public class EntregaDAO {
         }
 
         return entregas;
+    }
+
+    public Entrega buscarPorId(Long idEntrega) {
+        String sql = "SELECT ID_ENTREGA, ID_CLIENTE, ID_PRODUTO, CODIGO_PEDIDO, DATA_ENVIO, DATA_ENTREGA, TRANSPORTADORA, VALOR_FRETE " +
+                "FROM TB_ENTREGA WHERE ID_ENTREGA = ?";
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setLong(1, idEntrega);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Entrega entrega = new Entrega();
+
+                    entrega.setIdEntrega(rs.getLong("ID_ENTREGA"));
+                    entrega.setIdCliente(rs.getLong("ID_CLIENTE"));
+                    entrega.setIdProduto(rs.getLong("ID_PRODUTO"));
+                    entrega.setCodigoPedido(rs.getString("CODIGO_PEDIDO"));
+
+                    entrega.setDataEnvio(rs.getDate("DATA_ENVIO") != null ? rs.getDate("DATA_ENVIO").toString() : null);
+                    entrega.setDataEntrega(rs.getDate("DATA_ENTREGA") != null ? rs.getDate("DATA_ENTREGA").toString() : null);
+
+                    entrega.setTransportadora(rs.getString("TRANSPORTADORA"));
+                    entrega.setValorFrete(rs.getBigDecimal("VALOR_FRETE"));
+
+                    return entrega;
+                }
+                return null;
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar Entrega por ID", e);
+        }
+    }
+
+
+
+    public boolean editarEntrega(Entrega entrega) {
+        String sql = "UPDATE TB_ENTREGA SET CODIGO_PEDIDO = ?, DATA_ENVIO = ?, DATA_ENTREGA = ?, TRANSPORTADORA = ?, VALOR_FRETE = ? " +
+                "WHERE ID_ENTREGA = ?";
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, entrega.getCodigoPedido());
+
+
+            // Trata a data como String, Convertendo para java.sql.Date
+            if (entrega.getDataEnvio() != null && !entrega.getDataEnvio().isEmpty()) {
+                stmt.setDate(2, java.sql.Date.valueOf(entrega.getDataEnvio()));
+            } else {
+                stmt.setNull(2, java.sql.Types.DATE);
+            }
+
+            // Trata a data como String, Convertendo para java.sql.Date
+            if (entrega.getDataEntrega() != null && !entrega.getDataEntrega().isEmpty()) {
+                stmt.setDate(3, java.sql.Date.valueOf(entrega.getDataEntrega()));
+            } else {
+                stmt.setNull(3, java.sql.Types.DATE);
+            }
+
+            stmt.setString(4, entrega.getTransportadora());
+            stmt.setBigDecimal(5, entrega.getValorFrete());
+            stmt.setLong(6, entrega.getIdEntrega());
+
+
+            int linhasAfetadas = stmt.executeUpdate();
+
+            // Se nenhuma linha for atualizada, retorna false
+            return linhasAfetadas > 0;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao atualizar Entrega: " + e.getMessage(), e);
+        }
+
+    }
+    public boolean deletarEntrega(Long idEntrega) {
+        String sql = "DELETE FROM TB_ENTREGA WHERE id_entrega = ?";
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setLong(1, idEntrega);
+            return  stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao excluir Entrega: " + e.getMessage(), e);
+        }
     }
 }
