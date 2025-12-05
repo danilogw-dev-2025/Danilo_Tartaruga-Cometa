@@ -1,15 +1,9 @@
 package DAO;
 
 import DatabaseConfig.ConnectionFactory;
-import Model.Cliente;
 import Model.Entrega;
-
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,33 +11,40 @@ public class EntregaDAO {
 
     public void cadastrarEntrega(Entrega entrega) {
         String sql = "INSERT INTO TB_ENTREGA (" +
-                "CODIGO_PEDIDO, ID_CLIENTE, ID_PRODUTO, " +
-                "DATA_ENVIO, DATA_ENTREGA, TRANSPORTADORA, VALOR_FRETE" +
-                ") VALUES (?, ?, ?, ?, ?, ?, ?)";
+                "CODIGO_PEDIDO, ID_REMETENTE, ID_DESTINATARIO, ID_PRODUTO, " +
+                "DATA_ENVIO, DATA_ENTREGA, TRANSPORTADORA, VALOR_FRETE, STATUS" +
+                ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, entrega.getCodigoPedido());
-            stmt.setLong(2, entrega.getIdCliente());
-            stmt.setLong(3, entrega.getIdProduto());
-
-            // Convertendo String -> Date (espera formato yyyy-MM-dd)
-            stmt.setDate(4, Date.valueOf(entrega.getDataEnvio()));
-            stmt.setDate(5, Date.valueOf(entrega.getDataEntrega()));
-
-            stmt.setString(6, entrega.getTransportadora());
-            stmt.setBigDecimal(7, entrega.getValorFrete());
+            stmt.setLong(2, entrega.getIdRemetente());
+            stmt.setLong(3, entrega.getIdDestinatario());
+            stmt.setLong(4, entrega.getIdProduto());
+            stmt.setDate(5, Date.valueOf(entrega.getDataEnvio()));
+            stmt.setDate(6, Date.valueOf(entrega.getDataEntrega()));
+            stmt.setString(7, entrega.getTransportadora());
+            stmt.setBigDecimal(8, entrega.getValorFrete());
+            stmt.setString(9, entrega.getStatus());
 
             stmt.executeUpdate();
-
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao cadastrar entrega: " + e.getMessage(), e);
+            throw new RuntimeException("Erro ao cadastrar: " + e.getMessage(), e);
         }
     }
 
     public List<Entrega> listarEntregas() {
-        String sql = "SELECT * FROM TB_ENTREGA";
+        String sql = "SELECT E.*, " +
+                "R.NOME AS NOME_REMETENTE, " +
+                "D.NOME AS NOME_DESTINATARIO, " +
+                "P.NOME_PRODUTO, P.PRECO_PRODUTO, P.QUANTIDADE " +
+                "FROM TB_ENTREGA E " +
+                "INNER JOIN TB_CLIENTE R ON E.ID_REMETENTE = R.ID_CLIENTE " +
+                "INNER JOIN TB_CLIENTE D ON E.ID_DESTINATARIO = D.ID_CLIENTE " +
+                "INNER JOIN TB_PRODUTO P ON E.ID_PRODUTO = P.ID_PRODUTO " +
+                "ORDER BY E.ID_ENTREGA DESC";
+
         List<Entrega> entregas = new ArrayList<>();
 
         try (Connection conn = ConnectionFactory.getConnection();
@@ -51,116 +52,100 @@ public class EntregaDAO {
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                Date dataEnvio = rs.getDate("DATA_ENVIO");
-                Date dataEntrega = rs.getDate("DATA_ENTREGA");
-                BigDecimal valorFrete = rs.getBigDecimal("VALOR_FRETE");
-
                 Entrega entrega = new Entrega(
                         rs.getLong("ID_ENTREGA"),
-                        rs.getLong("ID_CLIENTE"),
+                        rs.getLong("ID_REMETENTE"),
+                        rs.getLong("ID_DESTINATARIO"),
                         rs.getLong("ID_PRODUTO"),
                         rs.getString("CODIGO_PEDIDO"),
-                        dataEnvio != null ? dataEnvio.toString() : null,   // DATE -> String
-                        dataEntrega != null ? dataEntrega.toString() : null,
+                        rs.getDate("DATA_ENVIO").toString(),
+                        rs.getDate("DATA_ENTREGA").toString(),
                         rs.getString("TRANSPORTADORA"),
-                        valorFrete
+                        rs.getBigDecimal("VALOR_FRETE"),
+                        rs.getString("STATUS")
                 );
+
+                entrega.setNomeRemetente(rs.getString("NOME_REMETENTE"));
+                entrega.setNomeDestinatario(rs.getString("NOME_DESTINATARIO"));
+                entrega.setNomeProduto(rs.getString("NOME_PRODUTO"));
+
+                // Preenche a Quantidade e Calcula Total
+                BigDecimal preco = rs.getBigDecimal("PRECO_PRODUTO");
+                long qtd = rs.getLong("QUANTIDADE");
+
+                entrega.setQuantidadeProduto(qtd);
+
+                if (preco != null) {
+                    entrega.setValorTotalProduto(preco.multiply(new BigDecimal(qtd)));
+                } else {
+                    entrega.setValorTotalProduto(BigDecimal.ZERO);
+                }
 
                 entregas.add(entrega);
             }
-
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao listar entregas: " + e.getMessage(), e);
+            throw new RuntimeException("Erro ao listar: " + e.getMessage(), e);
         }
-
         return entregas;
     }
 
-    public Entrega buscarPorId(Long idEntrega) {
-        String sql = "SELECT ID_ENTREGA, ID_CLIENTE, ID_PRODUTO, CODIGO_PEDIDO, DATA_ENVIO, DATA_ENTREGA, TRANSPORTADORA, VALOR_FRETE " +
-                "FROM TB_ENTREGA WHERE ID_ENTREGA = ?";
-
+    public Entrega buscarPorId(Long id) {
+        String sql = "SELECT * FROM TB_ENTREGA WHERE ID_ENTREGA = ?";
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setLong(1, idEntrega);
-
+            stmt.setLong(1, id);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    Entrega entrega = new Entrega();
-
-                    entrega.setIdEntrega(rs.getLong("ID_ENTREGA"));
-                    entrega.setIdCliente(rs.getLong("ID_CLIENTE"));
-                    entrega.setIdProduto(rs.getLong("ID_PRODUTO"));
-                    entrega.setCodigoPedido(rs.getString("CODIGO_PEDIDO"));
-
-                    entrega.setDataEnvio(rs.getDate("DATA_ENVIO") != null ? rs.getDate("DATA_ENVIO").toString() : null);
-                    entrega.setDataEntrega(rs.getDate("DATA_ENTREGA") != null ? rs.getDate("DATA_ENTREGA").toString() : null);
-
-                    entrega.setTransportadora(rs.getString("TRANSPORTADORA"));
-                    entrega.setValorFrete(rs.getBigDecimal("VALOR_FRETE"));
-
-                    return entrega;
+                    return new Entrega(
+                            rs.getLong("ID_ENTREGA"),
+                            rs.getLong("ID_REMETENTE"),
+                            rs.getLong("ID_DESTINATARIO"),
+                            rs.getLong("ID_PRODUTO"),
+                            rs.getString("CODIGO_PEDIDO"),
+                            rs.getDate("DATA_ENVIO").toString(),
+                            rs.getDate("DATA_ENTREGA").toString(),
+                            rs.getString("TRANSPORTADORA"),
+                            rs.getBigDecimal("VALOR_FRETE"),
+                            rs.getString("STATUS")
+                    );
                 }
                 return null;
             }
-
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao buscar Entrega por ID", e);
+            throw new RuntimeException("Erro ao buscar: " + e.getMessage(), e);
         }
     }
 
-
-
-    public boolean editarEntrega(Entrega entrega) {
-        String sql = "UPDATE TB_ENTREGA SET CODIGO_PEDIDO = ?, DATA_ENVIO = ?, DATA_ENTREGA = ?, TRANSPORTADORA = ?, VALOR_FRETE = ? " +
-                "WHERE ID_ENTREGA = ?";
+    public void editarEntrega(Entrega entrega) {
+        String sql = "UPDATE TB_ENTREGA SET CODIGO_PEDIDO=?, ID_REMETENTE=?, ID_DESTINATARIO=?, " +
+                "ID_PRODUTO=?, DATA_ENVIO=?, DATA_ENTREGA=?, TRANSPORTADORA=?, VALOR_FRETE=?, STATUS=? WHERE ID_ENTREGA=?";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, entrega.getCodigoPedido());
+            stmt.setLong(2, entrega.getIdRemetente());
+            stmt.setLong(3, entrega.getIdDestinatario());
+            stmt.setLong(4, entrega.getIdProduto());
+            stmt.setDate(5, Date.valueOf(entrega.getDataEnvio()));
+            stmt.setDate(6, Date.valueOf(entrega.getDataEntrega()));
+            stmt.setString(7, entrega.getTransportadora());
+            stmt.setBigDecimal(8, entrega.getValorFrete());
+            stmt.setString(9, entrega.getStatus());
+            stmt.setLong(10, entrega.getIdEntrega());
 
-
-            // Trata a data como String, Convertendo para java.sql.Date
-            if (entrega.getDataEnvio() != null && !entrega.getDataEnvio().isEmpty()) {
-                stmt.setDate(2, java.sql.Date.valueOf(entrega.getDataEnvio()));
-            } else {
-                stmt.setNull(2, java.sql.Types.DATE);
-            }
-
-            // Trata a data como String, Convertendo para java.sql.Date
-            if (entrega.getDataEntrega() != null && !entrega.getDataEntrega().isEmpty()) {
-                stmt.setDate(3, java.sql.Date.valueOf(entrega.getDataEntrega()));
-            } else {
-                stmt.setNull(3, java.sql.Types.DATE);
-            }
-
-            stmt.setString(4, entrega.getTransportadora());
-            stmt.setBigDecimal(5, entrega.getValorFrete());
-            stmt.setLong(6, entrega.getIdEntrega());
-
-
-            int linhasAfetadas = stmt.executeUpdate();
-
-            // Se nenhuma linha for atualizada, retorna false
-            return linhasAfetadas > 0;
-
+            stmt.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao atualizar Entrega: " + e.getMessage(), e);
+            throw new RuntimeException("Erro ao editar: " + e.getMessage(), e);
         }
-
     }
-    public boolean deletarEntrega(Long idEntrega) {
-        String sql = "DELETE FROM TB_ENTREGA WHERE id_entrega = ?";
 
+    public void deletarEntrega(Long id) {
+        String sql = "DELETE FROM TB_ENTREGA WHERE ID_ENTREGA = ?";
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setLong(1, idEntrega);
-            return  stmt.executeUpdate() > 0;
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao excluir Entrega: " + e.getMessage(), e);
-        }
+            stmt.setLong(1, id);
+            stmt.executeUpdate();
+        } catch (SQLException e) { throw new RuntimeException(e); }
     }
 }

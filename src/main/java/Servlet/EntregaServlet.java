@@ -1,5 +1,6 @@
 package Servlet;
 
+import BO.EntregaBO;
 import DAO.ClienteDAO;
 import DAO.EntregaDAO;
 import DAO.ProdutoDAO;
@@ -7,135 +8,126 @@ import Model.Cliente;
 import Model.Entrega;
 import Model.Produto;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.util.List;
 
 @WebServlet("/entrega-servlet")
 public class EntregaServlet extends HttpServlet {
-    private String message;
 
-    //inicialização como configurações de recursos ou estabelecimento de conexões com o banco
     @Override
-    public void init () {
-        message = "endpoint-entrega";
-    }
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
-    //solicita dados do servidor
-    @Override
-    public void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
-
-        String idParam = request.getParameter("idEntrega");
         String action = request.getParameter("action");
+        String idParam = request.getParameter("idEntrega");
 
-        if ("delete".equals(action)) {
-            deletarEntrega(request, response);
-            return;
-        }
-
-        if (idParam == null || idParam.isEmpty()) {
-            response.sendRedirect(request.getContextPath() + "/listar-entregas");
-            return;
-        }
+        EntregaDAO entregaDAO = new EntregaDAO();
+        ClienteDAO clienteDAO = new ClienteDAO();
+        ProdutoDAO produtoDAO = new ProdutoDAO();
+        EntregaBO entregaBO = new EntregaBO();
 
         try {
-            Long idEntrega = Long.parseLong(idParam);
-
-            EntregaDAO entregaDAO = new EntregaDAO();
-            ClienteDAO clienteDAO = new ClienteDAO();
-            ProdutoDAO produtoDAO = new ProdutoDAO();
-
-            Entrega entrega = entregaDAO.buscarPorId(idEntrega);
-
-            if (entrega == null) {
-                response.sendRedirect(request.getContextPath() + "/listar-entregas");
+            if ("delete".equals(action) && idParam != null) {
+                try {
+                    entregaBO.deletar(Long.parseLong(idParam));
+                } catch (Exception e) {
+                    request.setAttribute("erroMsg", e.getMessage());
+                }
+                List<Entrega> lista = entregaDAO.listarEntregas();
+                request.setAttribute("listaEntregas", lista);
+                RequestDispatcher dispatcher = request.getRequestDispatcher("/lista-entregas.jsp");
+                dispatcher.forward(request, response);
                 return;
             }
 
-            List<Cliente> listaClientes = clienteDAO.listarClientes();
-            List<Produto> listaProdutos = produtoDAO.listarProdutos();
+            if ("novo".equals(action) || "editar".equals(action)) {
+                List<Cliente> listaClientes = clienteDAO.listarClientes();
+                List<Produto> listaProdutos = produtoDAO.listarProdutos();
 
-            request.setAttribute("entrega", entrega);
-            request.setAttribute("listaClientes", listaClientes);
-            request.setAttribute("listaProdutos", listaProdutos);
+                request.setAttribute("listaClientes", listaClientes);
+                request.setAttribute("listaProdutos", listaProdutos);
 
-            request.getRequestDispatcher("/editar-entregas.jsp").forward(request, response);
+                if ("editar".equals(action) && idParam != null) {
+                    Entrega entrega = entregaDAO.buscarPorId(Long.parseLong(idParam));
+                    request.setAttribute("entrega", entrega);
+                }
 
-        } catch (NumberFormatException | ServletException e) {
-            response.sendRedirect(request.getContextPath() + "/listar-entregas");
+                RequestDispatcher dispatcher = request.getRequestDispatcher("/form-entrega.jsp");
+                dispatcher.forward(request, response);
+                return;
+            }
+
+            List<Entrega> lista = entregaDAO.listarEntregas();
+            request.setAttribute("listaEntregas", lista);
+            RequestDispatcher dispatcher = request.getRequestDispatcher("/lista-entregas.jsp");
+            dispatcher.forward(request, response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendRedirect(request.getContextPath() + "/entrega-servlet");
         }
     }
-    private void deletarEntrega(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
-
-        Long idEntrega = Long.parseLong(request.getParameter("idEntrega"));
-
-        EntregaDAO dao = new EntregaDAO();
-        dao.deletarEntrega(idEntrega);
-
-        response.sendRedirect(request.getContextPath() + "/listar-entregas");
-    }
-
 
     @Override
-    public void doPost (HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("text/html");
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        request.setCharacterEncoding("UTF-8");
 
         String idStr = request.getParameter("idEntrega");
-
-        //pega os parametros do form-entrega.jsp
         String transportadora = request.getParameter("transportadora");
-        String codigo_pedido = request.getParameter("codigo_pedido");
-        String id_cliente = request.getParameter("id_cliente");
-        String id_produto = request.getParameter("id_produto");
-        String data_envio = request.getParameter("data_envio");
-        String data_entrega = request.getParameter("data_entrega");
-        String valor_frete = request.getParameter("valor_frete");
+        String codigoPedido = request.getParameter("codigo_pedido");
+        String dataEnvio = request.getParameter("data_envio");
+        String dataEntrega = request.getParameter("data_entrega");
+        String status = request.getParameter("status");
 
-        Long idCliente = Long.parseLong(id_cliente);
-        Long idProduto = Long.parseLong(id_produto);
+        // Captura os DOIS clientes e o produto
+        Long idRemetente = Long.parseLong(request.getParameter("id_remetente"));
+        Long idDestinatario = Long.parseLong(request.getParameter("id_destinatario"));
+        Long idProduto = Long.parseLong(request.getParameter("id_produto"));
 
-        BigDecimal valorFrete = new BigDecimal(valor_frete);
+        String valorStr = request.getParameter("valor_frete").replace(",", ".");
+        BigDecimal valorFrete = (valorStr != null && !valorStr.isEmpty()) ? new BigDecimal(valorStr) : BigDecimal.ZERO;
 
-        // 2) Monta objeto Entrega (usa o construtor que você tem no Model.Entrega)
         Entrega entrega = new Entrega(
-                idCliente,
+                idRemetente,
+                idDestinatario,
                 idProduto,
-                codigo_pedido,
-                data_envio,
-                data_entrega,
+                codigoPedido,
+                dataEnvio,
+                dataEntrega,
                 transportadora,
-                valorFrete
+                valorFrete,
+                status
         );
-        EntregaDAO entregaDAO = new EntregaDAO();
 
         if (idStr != null && !idStr.isEmpty()) {
-            Long idEntrega = Long.parseLong(idStr);
-            entrega.setIdEntrega(idEntrega);
-            entregaDAO.editarEntrega(entrega);
-        }
-        else {
-            entregaDAO.cadastrarEntrega(entrega);
+            entrega.setIdEntrega(Long.parseLong(idStr));
         }
 
-        //salvar no banco
-//        response.sendRedirect("listar-entregas");
-        response.sendRedirect(request.getContextPath() + "/listar-entregas");
+        try {
+            EntregaBO entregaBO = new EntregaBO();
+            entregaBO.salvar(entrega);
 
+            response.sendRedirect(request.getContextPath() + "/entrega-servlet");
 
+        } catch (Exception e) {
+            ClienteDAO clienteDAO = new ClienteDAO();
+            ProdutoDAO produtoDAO = new ProdutoDAO();
+
+            request.setAttribute("listaClientes", clienteDAO.listarClientes());
+            request.setAttribute("listaProdutos", produtoDAO.listarProdutos());
+
+            request.setAttribute("erroMsg", e.getMessage());
+            request.setAttribute("entrega", entrega);
+
+            RequestDispatcher dispatcher = request.getRequestDispatcher("/form-entrega.jsp");
+            dispatcher.forward(request, response);
+        }
     }
-
-    //retira o servlet de serviço
-    @Override
-    public void destroy () {
-
-    }
-
 }

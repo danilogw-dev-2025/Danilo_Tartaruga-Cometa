@@ -14,7 +14,7 @@ public class Produto {
     public  Produto() {
 
     }
-        //cadastro
+
     public Produto(String codigoProduto, String nomeProduto, String descricao, BigDecimal preco, Long quantidade) {
         this.codigoProduto = codigoProduto;
         this.nomeProduto = nomeProduto;
@@ -23,7 +23,6 @@ public class Produto {
         this.quantidade = quantidade;
     }
 
-    //select
     public Produto(Long idProduto, String codigoProduto, String nomeProduto, String descricao, BigDecimal preco, Long quantidade) {
         this.idProduto = idProduto;
         this.codigoProduto = codigoProduto;

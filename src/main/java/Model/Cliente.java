@@ -5,35 +5,40 @@ public class Cliente {
     private Long idCliente;
     private String codigoCliente;
     private String nome;
-    private String cpf;
-    private String dataNascimento;
-    private String email;
+    private String documento;
+    private String estado;
+    private String cidade;
+    private String bairro;
+    private String rua;
+    private int numeroCasa;
 
 
     public Cliente() {
 
     }
 
-
-    public Cliente (String codigoCliente, String nome, String cpf, String dataNascimento, String email) {
-        this.codigoCliente = codigoCliente;
-        this.nome = nome;
-        this.cpf = cpf;
-        this.dataNascimento = dataNascimento;
-        this.email = email;
-
-    }
-
-    public Cliente(Long idCliente, String codigoCliente, String nome, String cpf, String dataNascimento, String email) {
+    public Cliente(Long idCliente, String codigoCliente, String nome, String documento, String estado, String cidade, String bairro, String rua, int numeroCasa) {
         this.idCliente = idCliente;
         this.codigoCliente = codigoCliente;
         this.nome = nome;
-        this.cpf = cpf;
-        this.dataNascimento = dataNascimento;
-        this.email = email;
+        this.documento = documento;
+        this.estado = estado;
+        this.cidade = cidade;
+        this.bairro = bairro;
+        this.rua = rua;
+        this.numeroCasa = numeroCasa;
     }
 
-
+    public Cliente(String codigoCliente, String nome, String documento, String estado, String cidade, String bairro, String rua, int numeroCasa) {
+        this.codigoCliente = codigoCliente;
+        this.nome = nome;
+        this.documento = documento;
+        this.estado = estado;
+        this.cidade = cidade;
+        this.bairro = bairro;
+        this.rua = rua;
+        this.numeroCasa = numeroCasa;
+    }
 
     public Long getIdCliente() {
         return idCliente;
@@ -59,33 +64,81 @@ public class Cliente {
         this.nome = nome;
     }
 
-    public String getCpf() {
-        return cpf;
+    public String getDocumento() {
+        return documento;
     }
 
-    public void setCpf( String cpf) {
-        this.cpf = cpf;
+    public void setDocumento(String documento) {
+        this.documento = documento;
     }
 
-    public String getDataNascimento() {
-        return dataNascimento;
+    public String getEstado() {
+        return estado;
     }
 
-    public void setDataNascimento(String dataNascimento) {
-        this.dataNascimento = dataNascimento;
+    public void setEstado(String estado) {
+        this.estado = estado;
     }
 
-    public String getEmail() {
-       return email;
+    public String getCidade() {
+        return cidade;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setCidade(String cidade) {
+        this.cidade = cidade;
+    }
+
+    public String getBairro() {
+        return bairro;
+    }
+
+    public void setBairro(String bairro) {
+        this.bairro = bairro;
+    }
+
+    public String getRua() {
+        return rua;
+    }
+
+    public void setRua(String rua) {
+        this.rua = rua;
+    }
+
+    public int getNumeroCasa() {
+        return numeroCasa;
+    }
+
+    public void setNumeroCasa(int numeroCasa) {
+        this.numeroCasa = numeroCasa;
     }
 
 
+    public String getTipoPessoa() {
+        if (this.documento == null) {
+            return "Indefinido";
+        }
+
+        if (this.documento.length() > 14) {
+            return "CNPJ";
+        } else {
+            return "CPF";
+        }
+    }
+
+
+
+    @Override
     public String toString() {
-        return "ID_CLIENTE: " + this.idCliente + ", Codigo do Cliente: " + this.codigoCliente + ", Nome: " + this.nome + ", CPF: " + this.cpf + "," +
-                " Data de Nascimento: " + this.dataNascimento + ", Email: " + this.email;
+        return "Cliente{" +
+                "idCliente=" + idCliente +
+                ", codigoCliente='" + codigoCliente + '\'' +
+                ", nome='" + nome + '\'' +
+                ", documento='" + documento + '\'' +
+                ", estado='" + estado + '\'' +
+                ", cidade='" + cidade + '\'' +
+                ", bairro='" + bairro + '\'' +
+                ", rua='" + rua + '\'' +
+                ", numeroCasa=" + numeroCasa +
+                '}';
     }
 }

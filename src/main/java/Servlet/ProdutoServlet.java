@@ -1,120 +1,103 @@
 package Servlet;
 
-//ProdutoServlet → @WebServlet("/produto") (salvar)
-
-import DAO.ClienteDAO;
+import BO.ProdutoBO;
 import DAO.ProdutoDAO;
 import Model.Produto;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.math.BigDecimal;
+import java.util.List;
 
 @WebServlet("/produto-servlet")
 public class ProdutoServlet extends HttpServlet {
-    private String message;
-
-    @Override
-    public void init() {
-        message = "endpoint-produto";
-    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String ipParam = request.getParameter("idProduto");
         String action = request.getParameter("action");
+        String idParam = request.getParameter("idProduto");
 
-        if ("delete".equals(action)) {
-            deletarProduto(request, response);
-            return;
-        }
-
-        if (ipParam ==  null || ipParam.isEmpty()) {
-            response.sendRedirect(request.getContextPath() + "/listar-produtos");
-            return;
-        }
+        ProdutoDAO produtoDAO = new ProdutoDAO();
+        ProdutoBO produtoBO = new ProdutoBO();
 
         try {
-            Long idProduto = Long.parseLong(ipParam);
 
-            ProdutoDAO produtoDAO = new ProdutoDAO();
-            Produto produto = produtoDAO.buscarPorId(idProduto);
-
-            if (produto == null) {
-                response.sendRedirect(request.getContextPath() + "/listar-produtos");
+            if ("delete".equals(action) && idParam != null) {
+                Long idProduto = Long.parseLong(idParam);
+                produtoBO.deletar(idProduto);
+                response.sendRedirect(request.getContextPath() + "/produto-servlet");
                 return;
             }
 
-            request.setAttribute("produto", produto);
-            request.getRequestDispatcher("/editar-produtos.jsp")
-                    .forward(request, response);
+            if ("editar".equals(action) && idParam != null) {
+                Long idProduto = Long.parseLong(idParam);
+                Produto produto = produtoDAO.buscarPorId(idProduto);
+                request.setAttribute("produto", produto);
+                RequestDispatcher dispatcher = request.getRequestDispatcher("/form-produto.jsp");
+                dispatcher.forward(request, response);
+                return;
+            }
 
-        } catch (NumberFormatException e) {
-            response.sendRedirect(request.getContextPath());
+            List<Produto> lista = produtoDAO.listarProdutos();
+            request.setAttribute("listarProduto", lista);
+            RequestDispatcher dispatcher = request.getRequestDispatcher("/lista-produtos.jsp");
+            dispatcher.forward(request, response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendRedirect(request.getContextPath() + "/produto-servlet");
         }
     }
 
-    private void deletarProduto(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
-
-        Long idProduto = Long.parseLong(request.getParameter("idProduto"));
-
-        ProdutoDAO dao = new ProdutoDAO();
-        dao.deletarProduto(idProduto);
-
-        response.sendRedirect(request.getContextPath() + "/listar-produtos");
-    }
-
-
     @Override
-    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("text/html");
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        request.setCharacterEncoding("UTF-8");
 
         String idStr = request.getParameter("idProduto");
-//        PrintWriter pw = response.getWriter();
-
         String codigoProduto = request.getParameter("codigoProduto");
         String nomeProduto = request.getParameter("nomeProduto");
         String descricao = request.getParameter("descricao");
-        String preco = request.getParameter("preco");
-        String quantidade = request.getParameter("quantidade");
+        String precoStr = request.getParameter("preco");
+        String quantidadeStr = request.getParameter("quantidade");
 
-        BigDecimal preco_ = new BigDecimal(preco);
-        Long quantidade_ = Long.parseLong(quantidade);
+        // Tratamento de conversão
+        if(precoStr != null) precoStr = precoStr.replace(",", ".");
+        BigDecimal preco = (precoStr != null && !precoStr.isEmpty()) ? new BigDecimal(precoStr) : BigDecimal.ZERO;
+
+        Long quantidade = (quantidadeStr != null && !quantidadeStr.isEmpty()) ? Long.parseLong(quantidadeStr) : 0L;
 
         Produto produto = new Produto(
                 codigoProduto,
                 nomeProduto,
                 descricao,
-                preco_,
-                quantidade_
+                preco,
+                quantidade
         );
 
-        ProdutoDAO produtoDAO = new ProdutoDAO();
-
         if (idStr != null && !idStr.isEmpty()) {
-            Long idProduto = Long.parseLong(idStr);
-            produto.setIdProduto(idProduto);
-            produtoDAO.editarProdutos(produto);
-        }
-        else {
-            produtoDAO.cadastrarProduto(produto);
+            produto.setIdProduto(Long.parseLong(idStr));
         }
 
-        response.sendRedirect(request.getContextPath() + "/listar-produtos");
-    }
+        try {
+            ProdutoBO produtoBO = new ProdutoBO();
+            produtoBO.salvar(produto);
 
-    @Override
-    public void destroy () {
+            response.sendRedirect(request.getContextPath() + "/produto-servlet");
 
+        } catch (Exception e) {
+            // ERRO DE REGRA DE NEGÓCIO (bo)
+            request.setAttribute("erroMsg", e.getMessage());
+            request.setAttribute("produto", produto);
 
+            RequestDispatcher dispatcher = request.getRequestDispatcher("/form-produto.jsp");
+            dispatcher.forward(request, response);
+        }
     }
 }
-

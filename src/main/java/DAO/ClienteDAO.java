@@ -13,17 +13,20 @@ import java.util.List;
 public class ClienteDAO {
 
     public void cadastrarCliente(Cliente cliente) {
-        String sql = "INSERT INTO TB_CLIENTE (CODIGO_CLIENTE, NOME, CPF, DATA_NASCIMENTO, EMAIL) " +
-                "VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO TB_CLIENTE (CODIGO_CLIENTE, NOME, DOCUMENTO, ESTADO, CIDADE, BAIRRO, RUA, NUMERO_CASA) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, cliente.getCodigoCliente());
             stmt.setString(2, cliente.getNome());
-            stmt.setString(3, cliente.getCpf());
-            stmt.setDate(4, java.sql.Date.valueOf(cliente.getDataNascimento())); // String -> Date (yyyy-MM-dd)
-            stmt.setString(5, cliente.getEmail());
+            stmt.setString(3, cliente.getDocumento());
+            stmt.setString(4, cliente.getEstado());
+            stmt.setString(5, cliente.getCidade());
+            stmt.setString(6, cliente.getBairro());
+            stmt.setString(7, cliente.getRua());
+            stmt.setInt(8, cliente.getNumeroCasa());
             stmt.executeUpdate();
 
         } catch (SQLException e) {
@@ -40,15 +43,16 @@ public class ClienteDAO {
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                java.sql.Date dataNasc = rs.getDate("DATA_NASCIMENTO");
-
                 Cliente cliente = new Cliente(
                         rs.getLong("ID_CLIENTE"),
                         rs.getString("CODIGO_CLIENTE"),
                         rs.getString("NOME"),
-                        rs.getString("CPF"),
-                        dataNasc != null ? dataNasc.toString() : null,  // Conversão de Date para String
-                        rs.getString("EMAIL")
+                        rs.getString("DOCUMENTO"),
+                        rs.getString("ESTADO"),
+                        rs.getString("CIDADE"),
+                        rs.getString("BAIRRO"),
+                        rs.getString("RUA"),
+                        rs.getInt("NUMERO_CASA")
                 );
 
                 clientes.add(cliente);
@@ -60,7 +64,7 @@ public class ClienteDAO {
     }
 
     public Cliente buscarPorId(Long idCliente) {
-        String sql = "SELECT ID_CLIENTE, CODIGO_CLIENTE, NOME, CPF, DATA_NASCIMENTO, EMAIL " +
+        String sql = "SELECT ID_CLIENTE, CODIGO_CLIENTE, NOME, DOCUMENTO, ESTADO, CIDADE, BAIRRO, RUA, NUMERO_CASA " +
                 "FROM TB_CLIENTE " +
                 "WHERE ID_CLIENTE = ?";
 
@@ -76,14 +80,12 @@ public class ClienteDAO {
                     cliente.setIdCliente(rs.getLong("ID_CLIENTE"));
                     cliente.setCodigoCliente(rs.getString("CODIGO_CLIENTE"));
                     cliente.setNome(rs.getString("NOME"));
-                    cliente.setCpf(rs.getString("CPF"));
-
-                    // Conversão de java.sql.Date -> String
-                    java.sql.Date dataSql = rs.getDate("DATA_NASCIMENTO");
-                    String dataString = (dataSql != null) ? dataSql.toString() : null;
-                    cliente.setDataNascimento(dataString);
-
-                    cliente.setEmail(rs.getString("EMAIL"));
+                    cliente.setDocumento(rs.getString("DOCUMENTO"));
+                    cliente.setEstado(rs.getString("ESTADO"));
+                    cliente.setCidade(rs.getString("CIDADE"));
+                    cliente.setBairro(rs.getString("BAIRRO"));
+                    cliente.setRua(rs.getString("RUA"));
+                    cliente.setNumeroCasa(rs.getInt("NUMERO_CASA"));
 
                     return cliente; // <-- retorna o objeto aqui
                 } else {
@@ -98,7 +100,7 @@ public class ClienteDAO {
 
 
     public boolean editarCliente(Cliente cliente) {
-        String sql = "UPDATE TB_CLIENTE SET CODIGO_CLIENTE = ?, NOME = ?, CPF = ?, DATA_NASCIMENTO = ?, EMAIL = ? " +
+        String sql = "UPDATE TB_CLIENTE SET CODIGO_CLIENTE = ?, NOME = ?, DOCUMENTO = ?, ESTADO = ?, CIDADE = ?, BAIRRO = ?, RUA = ?, NUMERO_CASA =?  " +
                 "WHERE ID_CLIENTE = ?";
 
         try (Connection conn = ConnectionFactory.getConnection();
@@ -106,17 +108,13 @@ public class ClienteDAO {
 
             stmt.setString(1, cliente.getCodigoCliente());
             stmt.setString(2, cliente.getNome());
-            stmt.setString(3, cliente.getCpf());
-
-            // Trata a data como String, Convertendo para java.sql.Date
-            if (cliente.getDataNascimento() != null && !cliente.getDataNascimento().isEmpty()) {
-                stmt.setDate(4, java.sql.Date.valueOf(cliente.getDataNascimento()));
-            } else {
-                stmt.setNull(4, java.sql.Types.DATE);
-            }
-
-            stmt.setString(5, cliente.getEmail());
-            stmt.setLong(6, cliente.getIdCliente());
+            stmt.setString(3, cliente.getDocumento());
+            stmt.setString(4, cliente.getEstado());
+            stmt.setString(5, cliente.getCidade());
+            stmt.setString(6, cliente.getBairro());
+            stmt.setString(7, cliente.getRua());
+            stmt.setInt(8, cliente.getNumeroCasa());
+            stmt.setLong(9, cliente.getIdCliente());
 
             int linhasAfetadas = stmt.executeUpdate();
 

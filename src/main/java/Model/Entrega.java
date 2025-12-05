@@ -5,117 +5,100 @@ import java.math.BigDecimal;
 public class Entrega {
 
     private Long idEntrega;
-    private Long idCliente;
+    private Long idRemetente;
+    private Long idDestinatario;
     private Long idProduto;
     private String codigoPedido;
     private String dataEnvio;
     private String dataEntrega;
     private String transportadora;
     private BigDecimal valorFrete;
+    private String status;
 
-    public Entrega() {
-    }
+    // Campos apenas para exibição
+    private String nomeRemetente;
+    private String nomeDestinatario;
+    private String nomeProduto;
+    private BigDecimal valorTotalProduto;
+    private Long quantidadeProduto;
 
-    // construtor para cadastro (sem idEntrega)
-    public Entrega(Long idCliente, Long idProduto, String codigoPedido,
-                   String dataEnvio, String dataEntrega,
-                   String transportadora, BigDecimal valorFrete) {
-        this.idCliente = idCliente;
-        this.idProduto = idProduto;
-        this.codigoPedido = codigoPedido;
-        this.dataEnvio = dataEnvio;
-        this.dataEntrega = dataEntrega;
-        this.transportadora = transportadora;
-        this.valorFrete = valorFrete;
-    }
+    public Entrega() {}
 
-    // construtor para SELECT (com idEntrega)
-    public Entrega(Long idEntrega, Long idCliente, Long idProduto, String codigoPedido,
-                   String dataEnvio, String dataEntrega,
-                   String transportadora, BigDecimal valorFrete) {
+    public Entrega(Long idEntrega, Long idRemetente, Long idDestinatario, Long idProduto, String codigoPedido,
+                   String dataEnvio, String dataEntrega, String transportadora, BigDecimal valorFrete, String status) {
         this.idEntrega = idEntrega;
-        this.idCliente = idCliente;
+        this.idRemetente = idRemetente;
+        this.idDestinatario = idDestinatario;
         this.idProduto = idProduto;
         this.codigoPedido = codigoPedido;
         this.dataEnvio = dataEnvio;
         this.dataEntrega = dataEntrega;
         this.transportadora = transportadora;
         this.valorFrete = valorFrete;
+        this.status = status;
     }
 
-    public Long getIdEntrega() {
-        return idEntrega;
-    }
-
-    public void setIdEntrega(Long idEntrega) {
-        this.idEntrega = idEntrega;
-    }
-
-    public Long getIdCliente() {
-        return idCliente;
-    }
-
-    public void setIdCliente(Long idCliente) {
-        this.idCliente = idCliente;
-    }
-
-    public Long getIdProduto() {
-        return idProduto;
-    }
-
-    public void setIdProduto(Long idProduto) {
+    public Entrega(Long idRemetente, Long idDestinatario, Long idProduto, String codigoPedido,
+                   String dataEnvio, String dataEntrega, String transportadora, BigDecimal valorFrete, String status) {
+        this.idRemetente = idRemetente;
+        this.idDestinatario = idDestinatario;
         this.idProduto = idProduto;
-    }
-
-    public String getCodigoPedido() {
-        return codigoPedido;
-    }
-
-    public void setCodigoPedido(String codigoPedido) {
         this.codigoPedido = codigoPedido;
-    }
-
-    public String getDataEnvio() {
-        return dataEnvio;
-    }
-
-    public void setDataEnvio(String dataEnvio) {
         this.dataEnvio = dataEnvio;
-    }
-
-    public String getDataEntrega() {
-        return dataEntrega;
-    }
-
-    public void setDataEntrega(String dataEntrega) {
         this.dataEntrega = dataEntrega;
-    }
-
-    public String getTransportadora() {
-        return transportadora;
-    }
-
-    public void setTransportadora(String transportadora) {
         this.transportadora = transportadora;
-    }
-
-    public BigDecimal getValorFrete() {
-        return valorFrete;
-    }
-
-    public void setValorFrete(BigDecimal valorFrete) {
         this.valorFrete = valorFrete;
+        this.status = status;
     }
 
-    @Override
-    public String toString() {
-        return "ID ENTREGA: " + this.idEntrega +
-                ", ID CLIENTE: " + this.idCliente +
-                ", ID PRODUTO: " + this.idProduto +
-                ", Código do Pedido: " + this.codigoPedido +
-                ", Data de envio: " + this.dataEnvio +
-                ", Data de Entrega: " + this.dataEntrega +
-                ", Transportadora: " + this.transportadora +
-                ", Valor do Frete: " + this.valorFrete;
+    public BigDecimal getValorFinal() {
+        BigDecimal totalProd = (this.valorTotalProduto != null) ? this.valorTotalProduto : BigDecimal.ZERO;
+        BigDecimal frete = (this.valorFrete != null) ? this.valorFrete : BigDecimal.ZERO;
+        return totalProd.add(frete);
     }
+
+    public Long getIdEntrega() { return idEntrega; }
+    public void setIdEntrega(Long idEntrega) { this.idEntrega = idEntrega; }
+
+    public Long getIdRemetente() { return idRemetente; }
+    public void setIdRemetente(Long idRemetente) { this.idRemetente = idRemetente; }
+
+    public Long getIdDestinatario() { return idDestinatario; }
+    public void setIdDestinatario(Long idDestinatario) { this.idDestinatario = idDestinatario; }
+
+    public Long getIdProduto() { return idProduto; }
+    public void setIdProduto(Long idProduto) { this.idProduto = idProduto; }
+
+    public String getCodigoPedido() { return codigoPedido; }
+    public void setCodigoPedido(String codigoPedido) { this.codigoPedido = codigoPedido; }
+
+    public String getDataEnvio() { return dataEnvio; }
+    public void setDataEnvio(String dataEnvio) { this.dataEnvio = dataEnvio; }
+
+    public String getDataEntrega() { return dataEntrega; }
+    public void setDataEntrega(String dataEntrega) { this.dataEntrega = dataEntrega; }
+
+    public String getTransportadora() { return transportadora; }
+    public void setTransportadora(String transportadora) { this.transportadora = transportadora; }
+
+    public BigDecimal getValorFrete() { return valorFrete; }
+    public void setValorFrete(BigDecimal valorFrete) { this.valorFrete = valorFrete; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
+    public String getNomeRemetente() { return nomeRemetente; }
+    public void setNomeRemetente(String nomeRemetente) { this.nomeRemetente = nomeRemetente; }
+
+    public String getNomeDestinatario() { return nomeDestinatario; }
+    public void setNomeDestinatario(String nomeDestinatario) { this.nomeDestinatario = nomeDestinatario; }
+
+    public String getNomeProduto() { return nomeProduto; }
+    public void setNomeProduto(String nomeProduto) { this.nomeProduto = nomeProduto; }
+
+    public BigDecimal getValorTotalProduto() { return valorTotalProduto; }
+    public void setValorTotalProduto(BigDecimal valorTotalProduto) { this.valorTotalProduto = valorTotalProduto; }
+
+    public Long getQuantidadeProduto() { return quantidadeProduto; }
+    public void setQuantidadeProduto(Long quantidadeProduto) { this.quantidadeProduto = quantidadeProduto; }
 }
