@@ -42,7 +42,7 @@ public class ProdutoDAO {
 
             while (rs.next()) {
                 Long idProduto = rs.getLong("ID_PRODUTO");
-                String codigoProduto = rs.getString("CODIGO_PRODUTO").trim(); // <-- String, sem parseInt
+                String codigoProduto = rs.getString("CODIGO_PRODUTO").trim();
                 String nomeProduto = rs.getString("NOME_PRODUTO");
                 String descricao = rs.getString("DESCRICAO");
                 BigDecimal preco = rs.getBigDecimal("PRECO_PRODUTO");

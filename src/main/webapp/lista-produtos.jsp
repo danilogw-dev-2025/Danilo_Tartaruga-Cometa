@@ -1,17 +1,19 @@
-<%@ page contentType="text/html; charset=UTF-8" language="java" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="java.util.List" %>
 <%@ page import="Model.Produto" %>
+<%@ page import="java.math.BigDecimal" %>
+
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <title>Lista de Produtos</title>
     <style>
-        body { font-family: Arial, sans-serif; }
+        body { font-family: Arial, sans-serif; padding: 20px; }
         h1 { color: #333; }
-        table { border-collapse: collapse; margin-top: 20px; width: 100%; max-width: 900px; }
-        th, td { border: 1px solid #ccc; padding: 8px 12px; }
-        th { background-color: #f2f2f2; text-align: left; }
+        table { border-collapse: collapse; margin-top: 20px; width: 100%; max-width: 1000px; }
+        th, td { border: 1px solid #ccc; padding: 8px 12px; text-align: left; }
+        th { background-color: #f2f2f2; }
         tr:nth-child(even) { background-color: #fafafa; }
         a { text-decoration: none; color: #0066cc; }
     </style>
@@ -20,7 +22,7 @@
 
 <h1>Lista de Produtos</h1>
 
-<a href="novo-produto">Cadastrar novo Produto</a>
+<a href="form-produto.jsp">Cadastrar novo Produto</a>
 <br><br>
 <a href="<%= request.getContextPath() %>/menu">Voltar ao Menu Principal</a>
 <br><br>
@@ -32,39 +34,46 @@
 <table>
     <tr>
         <th>ID</th>
-        <th>Código Produto</th>
-        <th>Nome do Produto</th>
+        <th>Código</th>
+        <th>Nome</th>
         <th>Descrição</th>
-        <th>Preço</th>
-        <th>Quantidade</th>
-        <th>Editar</th>
+        <th>Preço Unit.</th>
+        <th>Qtd.</th>
+        <th>Valor Total (Estoque)</th> <th>Editar</th>
         <th>Excluir</th>
     </tr>
 
     <% if (lista != null && !lista.isEmpty()) {
-           for (Produto c : lista) { %>
+           for (Produto p : lista) {
+               BigDecimal total = BigDecimal.ZERO;
+               if (p.getPreco() != null) {
+                   total = p.getPreco().multiply(new BigDecimal(p.getQuantidade()));
+               }
+    %>
         <tr>
-            <td><%= c.getIdProduto() %></td>
-            <td><%= c.getCodigoProduto() %></td>
-            <td><%= c.getNomeProduto() %></td>
-            <td><%= c.getDescricao() %></td>
-            <td><%= c.getPreco() %></td>
-            <td><%= c.getQuantidade() %></td>
-            <td>
-                <a href="<%= request.getContextPath() %>/produto-servlet?action=editar&idProduto=<%= c.getIdProduto() %>">Editar</a>
-                </td>
+            <td><%= p.getIdProduto() %></td>
+            <td><%= p.getCodigoProduto() %></td>
+            <td><%= p.getNomeProduto() %></td>
+            <td><%= p.getDescricao() %></td>
+            <td>R$ <%= p.getPreco() %></td>
+            <td><%= p.getQuantidade() %></td>
 
-                <td>
-                 <a href="<%= request.getContextPath() %>/produto-servlet?action=delete&idProduto=<%= c.getIdProduto() %>"
+            <td style="font-weight: bold;">R$ <%= total %></td>
+
+            <td>
+                <a href="<%= request.getContextPath() %>/produto-servlet?action=editar&idProduto=<%= p.getIdProduto() %>">Editar</a>
+            </td>
+            <td>
+                 <a href="<%= request.getContextPath() %>/produto-servlet?action=delete&idProduto=<%= p.getIdProduto() %>"
                     onclick="return confirm('Deseja realmente excluir?');">
                     Excluir
-                    </a>
+                 </a>
             </td>
         </tr>
     <%   }
        } else { %>
         <tr>
-            <td colspan="8">Nenhum Produto registrado.</td>
+            <td colspan="9">Nenhum Produto registrado.</td>
         </tr>
     <% } %>
 </table>

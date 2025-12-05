@@ -1,120 +1,114 @@
 package Servlet;
 
+import BO.ClienteBO;
 import DAO.ClienteDAO;
 import Model.Cliente;
+
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
-
+import java.util.List;
 
 @WebServlet("/cliente-servlet")
 public class ClienteServlet extends HttpServlet {
-    private String message;
-
-    @Override
-    public void init(){
-        message = "endpoint-cliente";
-    }
-
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String idParam = request.getParameter("id");
         String action = request.getParameter("action");
+        String idParam = request.getParameter("id");
 
-        if ("delete".equals(action)) {
-            deletarCliente(request, response);
-            return;
-        }
-
-
-        // 1. Se não veio id, redireciona
-        if (idParam == null || idParam.isEmpty()) {
-            response.sendRedirect(request.getContextPath() + "/listar-clientes");
-            return;
-        }
+        ClienteDAO clienteDAO = new ClienteDAO();
+        ClienteBO clienteBO = new ClienteBO();
 
         try {
-            Long idCliente = Long.parseLong(idParam);
 
-            ClienteDAO clienteDAO = new ClienteDAO();
-            Cliente cliente = clienteDAO.buscarPorId(idCliente);
-
-            // 2. Se não encontrou o cliente, volta
-            if (cliente == null) {
-                response.sendRedirect(request.getContextPath() + "/listar-clientes");
+            if ("delete".equals(action) && idParam != null) {
+                Long idCliente = Long.parseLong(idParam);
+                clienteBO.deletar(idCliente);
+                response.sendRedirect(request.getContextPath() + "/cliente-servlet");
                 return;
             }
 
-            // 3. Guarda o objeto para o JSP
-            request.setAttribute("cliente", cliente);
+            if ("editar".equals(action) && idParam != null) {
+                Long idCliente = Long.parseLong(idParam);
+                Cliente cliente = clienteDAO.buscarPorId(idCliente);
 
-            // 4. Encaminha para o JSP de edição
-            request.getRequestDispatcher("/editar-clientes.jsp").forward(request, response);
+                request.setAttribute("cliente", cliente);
+                RequestDispatcher dispatcher = request.getRequestDispatcher("/form-cliente.jsp");
+                dispatcher.forward(request, response);
+                return;
+            }
 
-        } catch (NumberFormatException e) {
-            // id inválido → volta
-            response.sendRedirect(request.getContextPath() + "/listar-clientes");
+            List<Cliente> lista = clienteDAO.listarClientes();
+            request.setAttribute("listarCliente", lista);
+            RequestDispatcher dispatcher = request.getRequestDispatcher("/lista-clientes.jsp");
+            dispatcher.forward(request, response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendRedirect(request.getContextPath() + "/cliente-servlet");
         }
-
     }
-
-    private void deletarCliente(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
-
-        Long idCliente = Long.parseLong(request.getParameter("idCliente"));
-
-        ClienteDAO dao = new ClienteDAO();
-        dao.deletarCliente(idCliente);
-
-        response.sendRedirect(request.getContextPath() + "/listar-clientes");
-    }
-
-
 
     @Override
-    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("text/html");
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        request.setCharacterEncoding("UTF-8");
 
         String idStr = request.getParameter("idCliente");
-        //PrintWriter  pw = response.getWriter();
-
         String codigoCliente = request.getParameter("codigoCliente");
         String nome = request.getParameter("nome");
-        String cpf = request.getParameter("cpf");
-        String dataNascimento = request.getParameter("dataNascimento");
-        String email = request.getParameter("email");
+        String documento = request.getParameter("documento");
+        String estado = request.getParameter("estado");
+        String cidade = request.getParameter("cidade");
+        String bairro = request.getParameter("bairro");
+        String rua = request.getParameter("rua");
+        String numeroCasaStr = request.getParameter("numeroCasa");
+
+        // TRATAMENTO DE ERRO: Se vier vazio, considera 0
+        int numeroCasa = 0;
+        if (numeroCasaStr != null && !numeroCasaStr.isEmpty()) {
+            try {
+                numeroCasa = Integer.parseInt(numeroCasaStr);
+            } catch (NumberFormatException e) {
+                numeroCasa = 0;
+            }
+        }
 
 
         Cliente cliente = new Cliente(
                 codigoCliente,
                 nome,
-                cpf,
-                dataNascimento,
-                email
+                documento,
+                estado,
+                cidade,
+                bairro,
+                rua,
+                numeroCasa
         );
-        ClienteDAO  clienteDAO = new ClienteDAO();
 
         if (idStr != null && !idStr.isEmpty()) {
-            Long idCliente = Long.parseLong(idStr);
-            cliente.setIdCliente(idCliente);
-            clienteDAO.editarCliente(cliente);
-        }
-        else {
-            clienteDAO.cadastrarCliente(cliente);
+            cliente.setIdCliente(Long.parseLong(idStr));
         }
 
-        response.sendRedirect(request.getContextPath() + "/listar-clientes");
-    }
+        try {
+            ClienteBO clienteBO = new ClienteBO();
+            clienteBO.salvar(cliente);
 
-    @Override
-    public void destroy () {
+            response.sendRedirect(request.getContextPath() + "/cliente-servlet");
 
+        } catch (Exception e) {
+
+            request.setAttribute("erroMsg", e.getMessage());
+            request.setAttribute("cliente", cliente);
+
+            RequestDispatcher dispatcher = request.getRequestDispatcher("/form-cliente.jsp");
+            dispatcher.forward(request, response);
+        }
     }
 }

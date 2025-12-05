@@ -14,7 +14,6 @@ public class DatabaseConfig {
                 System.exit(1);
             }
 
-            // Load the properties file
             properties.load(input);
         } catch (IOException e) {
             e.printStackTrace();
