@@ -17,7 +17,7 @@
 <body>
 
 <h1>Cadastro de Cliente</h1>
-<a href="listar-clientes">Voltar para lista</a>
+<a href="cliente-servlet">Voltar para lista</a>
 <br><br>
 
 <%

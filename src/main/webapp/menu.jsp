@@ -48,24 +48,24 @@
 
     <div class="secao">
         <h2>Clientes</h2>
-        <a href="<%= request.getContextPath() %>/novo-cliente">➕ Cadastrar Cliente</a><br>
-        <a href="<%= request.getContextPath() %>/listar-clientes">📋 Listar Clientes</a>
+        <a href="<%= request.getContextPath() %>/form-cliente.jsp">➕ Cadastrar Cliente</a><br>
+        <a href="<%= request.getContextPath() %>/cliente-servlet">📋 Listar Clientes</a>
     </div>
 
     <hr>
 
     <div class="secao">
         <h2>Produtos</h2>
-        <a href="<%= request.getContextPath() %>/novo-produto">➕ Cadastrar Produto</a><br>
-        <a href="<%= request.getContextPath() %>/listar-produtos">📋 Listar Produtos</a>
+        <a href="<%= request.getContextPath() %>/form-produto.jsp">➕ Cadastrar Produto</a><br>
+        <a href="<%= request.getContextPath() %>/produto-servlet">📋 Listar Produtos</a>
     </div>
 
     <hr>
 
     <div class="secao">
         <h2>Entregas</h2>
-        <a href="<%= request.getContextPath() %>/nova-entrega">➕ Cadastrar Entrega</a><br>
-        <a href="<%= request.getContextPath() %>/listar-entregas">📋 Listar Entregas</a>
+        <a href="<%= request.getContextPath() %>/entrega-servlet?action=novo">➕ Cadastrar Entrega</a><br>
+        <a href="<%= request.getContextPath() %>/entrega-servlet">📋 Listar Entregas</a>
     </div>
 </div>
 
