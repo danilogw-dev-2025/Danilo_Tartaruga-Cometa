@@ -10,7 +10,12 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.List;
 
 @WebServlet("/cliente-servlet")
@@ -69,6 +74,7 @@ public class ClienteServlet extends HttpServlet {
         String bairro = request.getParameter("bairro");
         String rua = request.getParameter("rua");
         String numeroCasaStr = request.getParameter("numeroCasa");
+        String cep = request.getParameter("cep");
 
         // TRATAMENTO DE ERRO: Se vier vazio, considera 0
         int numeroCasa = 0;
@@ -89,7 +95,8 @@ public class ClienteServlet extends HttpServlet {
                 cidade,
                 bairro,
                 rua,
-                numeroCasa
+                numeroCasa,
+                cep
         );
 
         if (idStr != null && !idStr.isEmpty()) {

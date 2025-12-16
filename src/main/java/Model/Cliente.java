@@ -11,13 +11,14 @@ public class Cliente {
     private String bairro;
     private String rua;
     private int numeroCasa;
+    private String cep;
 
 
     public Cliente() {
 
     }
 
-    public Cliente(Long idCliente, String codigoCliente, String nome, String documento, String estado, String cidade, String bairro, String rua, int numeroCasa) {
+    public Cliente(Long idCliente, String codigoCliente, String nome, String documento, String estado, String cidade, String bairro, String rua, int numeroCasa, String cep) {
         this.idCliente = idCliente;
         this.codigoCliente = codigoCliente;
         this.nome = nome;
@@ -27,9 +28,10 @@ public class Cliente {
         this.bairro = bairro;
         this.rua = rua;
         this.numeroCasa = numeroCasa;
+        this.cep = cep;
     }
 
-    public Cliente(String codigoCliente, String nome, String documento, String estado, String cidade, String bairro, String rua, int numeroCasa) {
+    public Cliente(String codigoCliente, String nome, String documento, String estado, String cidade, String bairro, String rua, int numeroCasa, String cep) {
         this.codigoCliente = codigoCliente;
         this.nome = nome;
         this.documento = documento;
@@ -38,6 +40,7 @@ public class Cliente {
         this.bairro = bairro;
         this.rua = rua;
         this.numeroCasa = numeroCasa;
+        this.cep = cep;
     }
 
     public Long getIdCliente() {
@@ -112,6 +115,13 @@ public class Cliente {
         this.numeroCasa = numeroCasa;
     }
 
+    public String getCep() {
+        return cep;
+    }
+
+    public void setCep(String cep) {
+        this.cep = cep;
+    }
 
     public String getTipoPessoa() {
         if (this.documento == null) {
@@ -126,7 +136,6 @@ public class Cliente {
     }
 
 
-
     @Override
     public String toString() {
         return "Cliente{" +
@@ -139,6 +148,7 @@ public class Cliente {
                 ", bairro='" + bairro + '\'' +
                 ", rua='" + rua + '\'' +
                 ", numeroCasa=" + numeroCasa +
+                ", cep='" + cep + '\'' +
                 '}';
     }
 }

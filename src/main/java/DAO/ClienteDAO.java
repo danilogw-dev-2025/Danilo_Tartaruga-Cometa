@@ -13,8 +13,8 @@ import java.util.List;
 public class ClienteDAO {
 
     public void cadastrarCliente(Cliente cliente) {
-        String sql = "INSERT INTO TB_CLIENTE (CODIGO_CLIENTE, NOME, DOCUMENTO, ESTADO, CIDADE, BAIRRO, RUA, NUMERO_CASA) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO TB_CLIENTE (CODIGO_CLIENTE, NOME, DOCUMENTO, ESTADO, CIDADE, BAIRRO, RUA, NUMERO_CASA, CEP) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -27,6 +27,7 @@ public class ClienteDAO {
             stmt.setString(6, cliente.getBairro());
             stmt.setString(7, cliente.getRua());
             stmt.setInt(8, cliente.getNumeroCasa());
+            stmt.setString(9, cliente.getCep());
             stmt.executeUpdate();
 
         } catch (SQLException e) {
@@ -52,7 +53,8 @@ public class ClienteDAO {
                         rs.getString("CIDADE"),
                         rs.getString("BAIRRO"),
                         rs.getString("RUA"),
-                        rs.getInt("NUMERO_CASA")
+                        rs.getInt("NUMERO_CASA"),
+                        rs.getString("CEP")
                 );
 
                 clientes.add(cliente);
@@ -64,7 +66,7 @@ public class ClienteDAO {
     }
 
     public Cliente buscarPorId(Long idCliente) {
-        String sql = "SELECT ID_CLIENTE, CODIGO_CLIENTE, NOME, DOCUMENTO, ESTADO, CIDADE, BAIRRO, RUA, NUMERO_CASA " +
+        String sql = "SELECT ID_CLIENTE, CODIGO_CLIENTE, NOME, DOCUMENTO, ESTADO, CIDADE, BAIRRO, RUA, NUMERO_CASA, CEP " +
                 "FROM TB_CLIENTE " +
                 "WHERE ID_CLIENTE = ?";
 
@@ -86,6 +88,7 @@ public class ClienteDAO {
                     cliente.setBairro(rs.getString("BAIRRO"));
                     cliente.setRua(rs.getString("RUA"));
                     cliente.setNumeroCasa(rs.getInt("NUMERO_CASA"));
+                    cliente.setCep(rs.getString("CEP"));
 
                     return cliente; // <-- retorna o objeto aqui
                 } else {
@@ -100,7 +103,7 @@ public class ClienteDAO {
 
 
     public boolean editarCliente(Cliente cliente) {
-        String sql = "UPDATE TB_CLIENTE SET CODIGO_CLIENTE = ?, NOME = ?, DOCUMENTO = ?, ESTADO = ?, CIDADE = ?, BAIRRO = ?, RUA = ?, NUMERO_CASA =?  " +
+        String sql = "UPDATE TB_CLIENTE SET CODIGO_CLIENTE = ?, NOME = ?, DOCUMENTO = ?, ESTADO = ?, CIDADE = ?, BAIRRO = ?, RUA = ?, NUMERO_CASA = ? , CEP = ? " +
                 "WHERE ID_CLIENTE = ?";
 
         try (Connection conn = ConnectionFactory.getConnection();
@@ -114,7 +117,9 @@ public class ClienteDAO {
             stmt.setString(6, cliente.getBairro());
             stmt.setString(7, cliente.getRua());
             stmt.setInt(8, cliente.getNumeroCasa());
-            stmt.setLong(9, cliente.getIdCliente());
+            stmt.setString(9, cliente.getCep());
+            stmt.setLong(10, cliente.getIdCliente());
+
 
             int linhasAfetadas = stmt.executeUpdate();
 

@@ -54,20 +54,26 @@
     <small id="erroDocumento" style="color: #dc3545; display: none;"></small>
 
 
-    <label>Estado:</label>
-    <input type="text" name="estado" value="${cliente.estado}" required />
+    <label>CEP:</label>
+    <input type="text" id="cep" name="cep" maxlength="9"
+           onblur="buscarEndereco()"
+           value="${cliente.cep}" required />
+    <small id="erroCep" style="color: #dc3545; display: none;">CEP inválido ou não encontrado.</small>
+
+    <label>Estado (UF):</label>
+    <input type="text" id="estado" name="estado" value="${cliente.estado}" required readonly/>
 
     <label>Cidade:</label>
-    <input type="text" name="cidade" value="${cliente.cidade}" required />
+    <input type="text" id="cidade" name="cidade" value="${cliente.cidade}" required readonly/>
 
     <label>Bairro:</label>
-    <input type="text" name="bairro" value="${cliente.bairro}" required />
+    <input type="text" id="bairro" name="bairro" value="${cliente.bairro}" required readonly/>
 
-    <label>Rua:</label>
-    <input type="text" name="rua" value="${cliente.rua}" required />
+    <label>Rua/Logradouro:</label>
+    <input type="text" id="rua" name="rua" value="${cliente.rua}" required readonly/>
 
     <label>Número:</label>
-    <input type="number" name="numeroCasa" value="${cliente.numeroCasa}" />
+    <input type="number" id="numeroCasa" name="numeroCasa" value="${cliente.numeroCasa}" />
 
     <br>
     <button type="submit">Salvar</button>
@@ -210,7 +216,81 @@
     document.getElementById("tipoPJ").addEventListener("change", atualizarMascaraDocumento);
 
     window.onload = atualizarMascaraDocumento;
-</script>
+
+    /* ================= CEP (Integração AJAX) ================= */
+
+        function limparCamposEndereco() {
+            document.getElementById('rua').value = '';
+            document.getElementById('bairro').value = '';
+            document.getElementById('cidade').value = '';
+            document.getElementById('estado').value = '';
+            document.getElementById('erroCep').style.display = 'none';
+        }
+
+        function preencherCamposEndereco(dados) {
+            document.getElementById('rua').value = dados.logradouro;
+            document.getElementById('bairro').value = dados.bairro;
+            document.getElementById('cidade').value = dados.localidade;
+            document.getElementById('estado').value = dados.uf;
+
+            // Foca no campo número (o único que não é preenchido pela API)
+            document.getElementById('numeroCasa').focus();
+        }
+
+       function buscarEndereco() {
+               // ... (código para obter o CEP e abrir o xhr)
+               var cepInput = document.getElementById('cep');
+               var cep = somenteNumeros(cepInput.value);
+
+               limparCamposEndereco();
+
+               if (cep.length !== 8) {
+                   // ... (código de validação de CEP)
+                   return;
+               }
+
+               cepInput.value = cep.replace(/(\d{5})(\d{3})/, "$1-$2");
+
+               var xhr = new XMLHttpRequest();
+               xhr.open('GET', '<%= request.getContextPath() %>' + '/BuscaCepServlet?cep=' + cep, true);
+
+               document.getElementById('rua').value = '... buscando endereço ...';
+
+               xhr.onreadystatechange = function() {
+                   if (xhr.readyState === 4) {
+                       if (xhr.status === 200) {
+                           try {
+                               var jsonResponse = JSON.parse(xhr.responseText);
+
+                               // **VERIFICAÇÃO ADICIONAL DE INTEGRIDADE DO JSON**
+                               // Se o JSON contém 'erro' ou não tem 'uf' (básico para endereço), consideramos não encontrado.
+                               if (jsonResponse.erro || !jsonResponse.uf) {
+                                   limparCamposEndereco();
+                                   document.getElementById('erroCep').innerText = 'CEP não encontrado.';
+                                   document.getElementById('erroCep').style.display = 'block';
+                               } else {
+                                   // 4. Preenche os campos do formulário com sucesso
+                                   preencherCamposEndereco(jsonResponse);
+                               }
+                           } catch (e) {
+                               // 💥 ESTE É O BLOCO QUE ESTÁ SENDO EXECUTADO
+                               limparCamposEndereco();
+                               document.getElementById('erroCep').innerText = 'Erro ao processar a resposta do servidor. Verifique o console.';
+                               document.getElementById('erroCep').style.display = 'block';
+                               console.error("Erro no JSON.parse. Resposta bruta:", xhr.responseText, "Erro:", e); // MUITO IMPORTANTE
+                           }
+                       } else {
+                           // ... (código para erro de comunicação HTTP)
+                           limparCamposEndereco();
+                           document.getElementById('erroCep').innerText = 'Erro na comunicação com o servidor: ' + xhr.status;
+                           document.getElementById('erroCep').style.display = 'block';
+                       }
+                   }
+               };
+
+               xhr.send();
+           }
+    </script>
 
 
 </body>
