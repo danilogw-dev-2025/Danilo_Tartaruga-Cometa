@@ -67,9 +67,19 @@ public class ProdutoServlet extends HttpServlet {
         String precoStr = request.getParameter("preco");
         String quantidadeStr = request.getParameter("quantidade");
 
-        // Tratamento de conversão
-        if(precoStr != null) precoStr = precoStr.replace(",", ".");
-        BigDecimal preco = (precoStr != null && !precoStr.isEmpty()) ? new BigDecimal(precoStr) : BigDecimal.ZERO;
+
+        BigDecimal preco = BigDecimal.ZERO;
+
+        if (precoStr != null && !precoStr.isEmpty()) {
+            precoStr = precoStr
+                    .replace("R$", "")
+                    .replace(".", "")
+                    .replace(",", ".")
+                    .trim();
+
+            preco = new BigDecimal(precoStr);
+        }
+
 
         Long quantidade = (quantidadeStr != null && !quantidadeStr.isEmpty()) ? Long.parseLong(quantidadeStr) : 0L;
 

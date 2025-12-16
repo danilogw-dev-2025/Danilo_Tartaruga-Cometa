@@ -24,12 +24,6 @@ public class ClienteBO {
             throw new Exception("Documento inválido! Deve ter 11 (CPF) ou 14 (CNPJ) números.");
         }
 
-        if (docLimpo.length() == 11) {
-            if (cliente.getNumeroCasa() <= 0) {
-                throw new Exception("Erro: Para Pessoa Física, o número da casa é obrigatório!");
-            }
-        }
-
         try {
 
             if (cliente.getIdCliente() != null && cliente.getIdCliente() > 0) {

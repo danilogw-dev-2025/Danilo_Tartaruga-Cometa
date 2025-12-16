@@ -91,8 +91,29 @@ public class EntregaServlet extends HttpServlet {
         Long idDestinatario = Long.parseLong(request.getParameter("id_destinatario"));
         Long idProduto = Long.parseLong(request.getParameter("id_produto"));
 
-        String valorStr = request.getParameter("valor_frete").replace(",", ".");
-        BigDecimal valorFrete = (valorStr != null && !valorStr.isEmpty()) ? new BigDecimal(valorStr) : BigDecimal.ZERO;
+        // --- LÓGICA DE TRATAMENTO DA MÁSCARA DO FRETE ---
+        String valorFreteComMascara = request.getParameter("valor_frete");
+        BigDecimal valorFrete = BigDecimal.ZERO;
+
+        if (valorFreteComMascara != null && !valorFreteComMascara.isEmpty()) {
+            try {
+                // Remove o prefixo e espaços, ex: "R$ 1.234,56" -> "1.234,56"
+                String valorLimpo = valorFreteComMascara.replace("R$", "").trim();
+
+                // Remove os separadores de milhar, ex: "1.234,56" -> "1234,56"
+                valorLimpo = valorLimpo.replace(".", "");
+
+                // Substitui a vírgula decimal por ponto, ex: "1234,56" -> "1234.56"
+                valorLimpo = valorLimpo.replace(",", ".");
+
+                valorFrete = new BigDecimal(valorLimpo);
+
+            } catch (NumberFormatException e) {
+                // Trata o erro se o valor não puder ser convertido (útil para feedback ao usuário)
+                // Se houver erro, a lógica de erro abaixo tratará.
+                throw new ServletException("O valor do frete está em um formato inválido. Use apenas números.");
+            }
+        }
 
         Entrega entrega = new Entrega(
                 idRemetente,

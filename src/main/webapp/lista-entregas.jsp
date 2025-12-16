@@ -1,6 +1,9 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="java.util.List" %>
 <%@ page import="Model.Entrega" %>
+<%@ page import="java.time.LocalDate" %>
+<%@ page import="java.time.format.DateTimeFormatter" %>
+<%@ page import="util.DataUtils" %>
 
 <!DOCTYPE html>
 <html>
@@ -76,9 +79,10 @@
                        R$ <%= e.getValorFinal() %>
                    </td>
 
-                   <td><%= e.getDataEnvio() %></td>
-                   <td><%= e.getDataEntrega() %></td>
-                   <td><%= e.getTransportadora() %></td>
+                    <td><%= DataUtils.formatarDataBrasileira(e.getDataEnvio()) %></td>
+                    <td><%= DataUtils.formatarDataBrasileira(e.getDataEntrega()) %></td>
+
+                  <td><%= e.getTransportadora() %></td>
 
                    <td style="font-weight: bold; color: <%= "REALIZADA".equals(e.getStatus()) ? "green" : ("CANCELADA".equals(e.getStatus()) ? "red" : "orange") %>;">
                        <%= e.getStatus() %>

@@ -12,6 +12,10 @@
         button { margin-top: 15px; padding: 10px 20px; cursor: pointer; background-color: #007bff; color: white; border: none; }
 
         .erro-box { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 10px; margin-bottom: 20px; }
+        .input-erro {
+                border: 1px solid #dc3545;
+                background-color: #fff5f5;
+            }
     </style>
 </head>
 <body>
@@ -45,8 +49,10 @@
     <label>Nome:</label>
     <input type="text" name="nome" value="${cliente.nome}" required />
 
-    <label>Documento (Somente Números):</label>
-    <input type="number" id="documento" name="documento" value="${cliente.documento}" required />
+    <label>Documento (CPF/CNPJ):</label>
+    <input type="text" id="documento" name="documento" value="${cliente.documento}" required />
+    <small id="erroDocumento" style="color: #dc3545; display: none;"></small>
+
 
     <label>Estado:</label>
     <input type="text" name="estado" value="${cliente.estado}" required />
@@ -68,38 +74,144 @@
 </form>
 
 <script>
-    function validarAntesDeEnviar() {
-        var doc = document.getElementById("documento").value;
-        var numero = document.getElementsByName("numeroCasa")[0].value;
-        var isPF = document.getElementById("tipoPF").checked;
+    function somenteNumeros(valor) {
+        return valor.replace(/\D/g, "");
+    }
 
-        // 1. Validação de Tamanho do Documento
-        if (isPF && doc.length !== 11) {
-            alert("Para Pessoa Física, o CPF deve ter exatamente 11 números.");
-            return false;
+    function mostrarErro(msg) {
+        const erro = document.getElementById("erroDocumento");
+        const input = document.getElementById("documento");
+
+        erro.innerText = msg;
+        erro.style.display = "block";
+        input.classList.add("input-erro");
+    }
+
+    function limparErro() {
+        const erro = document.getElementById("erroDocumento");
+        const input = document.getElementById("documento");
+
+        erro.innerText = "";
+        erro.style.display = "none";
+        input.classList.remove("input-erro");
+    }
+
+    /* ================= CPF ================= */
+    function validarCPF(cpf) {
+        if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
+
+        let soma = 0;
+        for (let i = 0; i < 9; i++) {
+            soma += parseInt(cpf.charAt(i)) * (10 - i);
         }
-        if (!isPF && doc.length !== 14) {
-            alert("Para Pessoa Jurídica, o CNPJ deve ter exatamente 14 números.");
-            return false;
+        let digito1 = (soma * 10) % 11;
+        if (digito1 === 10) digito1 = 0;
+        if (digito1 !== parseInt(cpf.charAt(9))) return false;
+
+        soma = 0;
+        for (let i = 0; i < 10; i++) {
+            soma += parseInt(cpf.charAt(i)) * (11 - i);
         }
+        let digito2 = (soma * 10) % 11;
+        if (digito2 === 10) digito2 = 0;
+
+        return digito2 === parseInt(cpf.charAt(10));
+    }
+
+    /* ================= CNPJ ================= */
+    function validarCNPJ(cnpj) {
+        if (cnpj.length !== 14 || /^(\d)\1+$/.test(cnpj)) return false;
+
+        let tamanho = cnpj.length - 2;
+        let numeros = cnpj.substring(0, tamanho);
+        let digitos = cnpj.substring(tamanho);
+        let soma = 0;
+        let pos = tamanho - 7;
+
+        for (let i = tamanho; i >= 1; i--) {
+            soma += numeros.charAt(tamanho - i) * pos--;
+            if (pos < 2) pos = 9;
+        }
+
+        let resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
+        if (resultado !== parseInt(digitos.charAt(0))) return false;
+
+        tamanho++;
+        numeros = cnpj.substring(0, tamanho);
+        soma = 0;
+        pos = tamanho - 7;
+
+        for (let i = tamanho; i >= 1; i--) {
+            soma += numeros.charAt(tamanho - i) * pos--;
+            if (pos < 2) pos = 9;
+        }
+
+        resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
+        return resultado === parseInt(digitos.charAt(1));
+    }
+
+    /* ================= MÁSCARA ================= */
+    function aplicarMascaraCPF(valor) {
+        return valor
+            .replace(/(\d{3})(\d)/, "$1.$2")
+            .replace(/(\d{3})(\d)/, "$1.$2")
+            .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+    }
+
+    function aplicarMascaraCNPJ(valor) {
+        return valor
+            .replace(/(\d{2})(\d)/, "$1.$2")
+            .replace(/(\d{3})(\d)/, "$1.$2")
+            .replace(/(\d{3})(\d)/, "$1/$2")
+            .replace(/(\d{4})(\d{1,2})$/, "$1-$2");
+    }
+
+    function atualizarMascaraDocumento() {
+        const input = document.getElementById("documento");
+        const isPF = document.getElementById("tipoPF").checked;
+        let valor = somenteNumeros(input.value);
+
+        limparErro();
 
         if (isPF) {
-            if (numero === "" || numero === "0") {
-                alert("Erro: Para Pessoa Física, o número da casa é obrigatório.");
-                return false; // Bloqueia envio
+            input.maxLength = 14;
+            input.value = aplicarMascaraCPF(valor);
+        } else {
+            input.maxLength = 18;
+            input.value = aplicarMascaraCNPJ(valor);
+        }
+    }
+
+    /* ================= SUBMIT ================= */
+    function validarAntesDeEnviar() {
+        const input = document.getElementById("documento");
+        const isPF = document.getElementById("tipoPF").checked;
+        const valor = somenteNumeros(input.value);
+
+        if (isPF) {
+            if (!validarCPF(valor)) {
+                mostrarErro("CPF inválido. Verifique os dígitos.");
+                return false;
+            }
+        } else {
+            if (!validarCNPJ(valor)) {
+                mostrarErro("CNPJ inválido. Verifique os dígitos.");
+                return false;
             }
         }
 
+        // envia apenas números
+        input.value = valor;
         return true;
     }
 
-    window.onload = function() {
-        var doc = document.getElementById("documento").value;
-        if (doc.length > 11) {
-            document.getElementById("tipoPJ").checked = true;
-        }
-    };
+    document.getElementById("documento").addEventListener("input", atualizarMascaraDocumento);
+    document.getElementById("tipoPF").addEventListener("change", atualizarMascaraDocumento);
+    document.getElementById("tipoPJ").addEventListener("change", atualizarMascaraDocumento);
+
+    window.onload = atualizarMascaraDocumento;
 </script>
+
 
 </body>
 </html>
