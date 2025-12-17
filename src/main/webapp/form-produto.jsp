@@ -42,7 +42,8 @@
     <input type="hidden" name="idProduto" value="${produto.idProduto}" />
 
     <label for="codigoProduto">Código do Produto:</label>
-    <input type="text" id="codigoProduto" name="codigoProduto" value="${produto.codigoProduto}" required />
+    <input type="text" name="codigoProduto" value="${produto.codigoProduto != null ? produto.codigoProduto : 'Gerado automaticamente'}" readonly
+        style="background-color: #eee;" />
 
     <label for="nomeProduto">Nome do Produto:</label>
     <input type="text" id="nomeProduto" name="nomeProduto" value="${produto.nomeProduto}" required />

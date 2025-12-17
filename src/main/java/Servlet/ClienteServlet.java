@@ -66,7 +66,6 @@ public class ClienteServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
 
         String idStr = request.getParameter("idCliente");
-        String codigoCliente = request.getParameter("codigoCliente");
         String nome = request.getParameter("nome");
         String documento = request.getParameter("documento");
         String estado = request.getParameter("estado");
@@ -88,7 +87,6 @@ public class ClienteServlet extends HttpServlet {
 
 
         Cliente cliente = new Cliente(
-                codigoCliente,
                 nome,
                 documento,
                 estado,

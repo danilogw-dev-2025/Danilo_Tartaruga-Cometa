@@ -101,4 +101,25 @@ public class Entrega {
 
     public Long getQuantidadeProduto() { return quantidadeProduto; }
     public void setQuantidadeProduto(Long quantidadeProduto) { this.quantidadeProduto = quantidadeProduto; }
+
+    @Override
+    public String toString() {
+        return "Entrega{" +
+                "idEntrega=" + idEntrega +
+                ", idRemetente=" + idRemetente +
+                ", idDestinatario=" + idDestinatario +
+                ", idProduto=" + idProduto +
+                ", codigoPedido='" + codigoPedido + '\'' +
+                ", dataEnvio='" + dataEnvio + '\'' +
+                ", dataEntrega='" + dataEntrega + '\'' +
+                ", transportadora='" + transportadora + '\'' +
+                ", valorFrete=" + valorFrete +
+                ", status='" + status + '\'' +
+                ", nomeRemetente='" + nomeRemetente + '\'' +
+                ", nomeDestinatario='" + nomeDestinatario + '\'' +
+                ", nomeProduto='" + nomeProduto + '\'' +
+                ", valorTotalProduto=" + valorTotalProduto +
+                ", quantidadeProduto=" + quantidadeProduto +
+                '}';
+    }
 }

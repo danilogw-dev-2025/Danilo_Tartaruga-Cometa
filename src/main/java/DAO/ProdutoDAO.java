@@ -12,21 +12,44 @@ public class ProdutoDAO {
 
     public void cadastrarProduto(Produto produto) {
         String sql = "INSERT INTO TB_PRODUTO (" +
-                "CODIGO_PRODUTO, NOME_PRODUTO, DESCRICAO, PRECO_PRODUTO, QUANTIDADE" +
-                ") VALUES (?, ?, ?, ?, ?)";
+                "NOME_PRODUTO, DESCRICAO, PRECO_PRODUTO, QUANTIDADE" +
+                ") VALUES (?, ?, ?, ?) RETURNING ID_PRODUTO";
 
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = ConnectionFactory.getConnection()) {
+            conn.setAutoCommit(false);
 
-            // CODIGO_PRODUTO é CHAR(30) no banco -> converto o int para String
-            stmt.setString(1, String.valueOf(produto.getCodigoProduto()));
-            stmt.setString(2, produto.getNomeProduto());
-            stmt.setString(3, produto.getDescricao());
-            stmt.setBigDecimal(4, produto.getPreco());
-            stmt.setLong(5, produto.getQuantidade());
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.executeUpdate();
+                stmt.setString(1, produto.getNomeProduto());
+                stmt.setString(2, produto.getDescricao());
+                stmt.setBigDecimal(3, produto.getPreco());
+                stmt.setLong(4, produto.getQuantidade());
 
+                ResultSet rs = stmt.executeQuery();
+
+                if (rs.next()) {
+                    long idGerado = rs.getLong(1);
+
+                    String sigla = produto.gerarSiglaDoProd();
+                    String codigoFinal = String.format("%s%05d", sigla, idGerado);
+
+                    String sqlUpdate = "UPDATE TB_PRODUTO SET CODIGO_PRODUTO = ? WHERE ID_PRODUTO = ?";
+                    try (PreparedStatement stmtUpdate = conn.prepareStatement(sqlUpdate)) {
+                        stmtUpdate.setString(1, codigoFinal);
+                        stmtUpdate.setLong(2, idGerado);
+                        stmtUpdate.executeUpdate();
+                    }
+
+                    produto.setCodigoProduto(codigoFinal);
+                    produto.setIdProduto(idGerado);
+                }
+
+                conn.commit();
+
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao cadastrar produto: " + e.getMessage(), e);
         }

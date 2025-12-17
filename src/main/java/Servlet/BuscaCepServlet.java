@@ -1,5 +1,4 @@
 package Servlet;
-// Ajuste o pacote conforme a sua estrutura (ex: br.com.projeto.servlet)
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;

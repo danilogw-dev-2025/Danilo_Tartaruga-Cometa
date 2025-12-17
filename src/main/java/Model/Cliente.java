@@ -43,6 +43,17 @@ public class Cliente {
         this.cep = cep;
     }
 
+    public Cliente(String nome, String documento, String estado, String cidade, String bairro, String rua, int numeroCasa, String cep) {
+        this.nome = nome;
+        this.documento = documento;
+        this.estado = estado;
+        this.cidade = cidade;
+        this.bairro = bairro;
+        this.rua = rua;
+        this.numeroCasa = numeroCasa;
+        this.cep = cep;
+    }
+
     public Long getIdCliente() {
         return idCliente;
     }
@@ -134,6 +145,29 @@ public class Cliente {
             return "CPF";
         }
     }
+
+    public String gerarSiglaDoNome() {
+        if (this.nome == null || this.nome.trim().isEmpty()) {
+            return "CLI"; //default sigla
+        }
+
+        // Remove espaços extras e divide o nome por palavras
+        String[] partes = this.nome.trim().toUpperCase().split("\\s+");
+        StringBuffer sigla = new StringBuffer();
+
+        for (int i = 0; i < Math.min(partes.length, 3); i++) {
+            if (!partes[i].isEmpty()) {
+                sigla.append(partes[i].charAt(0));
+            }
+        }
+
+        // Se o nome for apenas "Ana" (sigla A), preenche com X até ter 3 letras (AXX)
+        while(sigla.length() < 3) {
+            sigla.append("X");
+        }
+        return sigla.toString();
+    }
+
 
 
     @Override

@@ -44,7 +44,8 @@
     </div>
 
     <label>Código:</label>
-    <input type="text" name="codigoCliente" value="${cliente.codigoCliente}" required />
+    <input type="text" name="codigoCliente" value="${cliente.codigoCliente != null ? cliente.codigoCliente : 'Gerado automaticamente'}" readonly
+    style="background-color: #eee;" />
 
     <label>Nome:</label>
     <input type="text" name="nome" value="${cliente.nome}" required />
@@ -57,20 +58,20 @@
     <label>CEP:</label>
     <input type="text" id="cep" name="cep" maxlength="9"
            onblur="buscarEndereco()"
-           value="${cliente.cep}" required />
+           value="${cliente.cep}"  />
     <small id="erroCep" style="color: #dc3545; display: none;">CEP inválido ou não encontrado.</small>
 
     <label>Estado (UF):</label>
-    <input type="text" id="estado" name="estado" value="${cliente.estado}" required readonly/>
+    <input type="text" id="estado" name="estado" value="${cliente.estado}" required />
 
     <label>Cidade:</label>
-    <input type="text" id="cidade" name="cidade" value="${cliente.cidade}" required readonly/>
+    <input type="text" id="cidade" name="cidade" value="${cliente.cidade}" required />
 
     <label>Bairro:</label>
-    <input type="text" id="bairro" name="bairro" value="${cliente.bairro}" required readonly/>
+    <input type="text" id="bairro" name="bairro" value="${cliente.bairro}" required />
 
     <label>Rua/Logradouro:</label>
-    <input type="text" id="rua" name="rua" value="${cliente.rua}" required readonly/>
+    <input type="text" id="rua" name="rua" value="${cliente.rua}" required />
 
     <label>Número:</label>
     <input type="number" id="numeroCasa" name="numeroCasa" value="${cliente.numeroCasa}" />
@@ -265,9 +266,8 @@
                                // **VERIFICAÇÃO ADICIONAL DE INTEGRIDADE DO JSON**
                                // Se o JSON contém 'erro' ou não tem 'uf' (básico para endereço), consideramos não encontrado.
                                if (jsonResponse.erro || !jsonResponse.uf) {
-                                   limparCamposEndereco();
-                                   document.getElementById('erroCep').innerText = 'CEP não encontrado.';
-                                   document.getElementById('erroCep').style.display = 'block';
+                                   document.getElementById('erroCep').innerText = 'CEP não encontrado. Preencha manualmente.';
+                                       document.getElementById('erroCep').style.display = 'block';
                                } else {
                                    // 4. Preenche os campos do formulário com sucesso
                                    preencherCamposEndereco(jsonResponse);

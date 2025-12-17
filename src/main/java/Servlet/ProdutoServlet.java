@@ -61,7 +61,6 @@ public class ProdutoServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
 
         String idStr = request.getParameter("idProduto");
-        String codigoProduto = request.getParameter("codigoProduto");
         String nomeProduto = request.getParameter("nomeProduto");
         String descricao = request.getParameter("descricao");
         String precoStr = request.getParameter("preco");
@@ -84,7 +83,6 @@ public class ProdutoServlet extends HttpServlet {
         Long quantidade = (quantidadeStr != null && !quantidadeStr.isEmpty()) ? Long.parseLong(quantidadeStr) : 0L;
 
         Produto produto = new Produto(
-                codigoProduto,
                 nomeProduto,
                 descricao,
                 preco,

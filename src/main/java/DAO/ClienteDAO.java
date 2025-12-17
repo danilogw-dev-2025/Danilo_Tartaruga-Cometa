@@ -13,23 +13,52 @@ import java.util.List;
 public class ClienteDAO {
 
     public void cadastrarCliente(Cliente cliente) {
-        String sql = "INSERT INTO TB_CLIENTE (CODIGO_CLIENTE, NOME, DOCUMENTO, ESTADO, CIDADE, BAIRRO, RUA, NUMERO_CASA, CEP) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        String sqlInsert = "INSERT INTO TB_CLIENTE (NOME, DOCUMENTO, ESTADO, CIDADE, BAIRRO, RUA, NUMERO_CASA, CEP) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING ID_CLIENTE";
 
-            stmt.setString(1, cliente.getCodigoCliente());
-            stmt.setString(2, cliente.getNome());
-            stmt.setString(3, cliente.getDocumento());
-            stmt.setString(4, cliente.getEstado());
-            stmt.setString(5, cliente.getCidade());
-            stmt.setString(6, cliente.getBairro());
-            stmt.setString(7, cliente.getRua());
-            stmt.setInt(8, cliente.getNumeroCasa());
-            stmt.setString(9, cliente.getCep());
-            stmt.executeUpdate();
+        try (Connection conn = ConnectionFactory.getConnection()) {
+            conn.setAutoCommit(false);
 
+            try (PreparedStatement stmt = conn.prepareStatement(sqlInsert)) {
+
+                stmt.setString(1, cliente.getNome());
+                stmt.setString(2, cliente.getDocumento());
+                stmt.setString(3, cliente.getEstado());
+                stmt.setString(4, cliente.getCidade());
+                stmt.setString(5, cliente.getBairro());
+                stmt.setString(6, cliente.getRua());
+                stmt.setInt(7, cliente.getNumeroCasa());
+                stmt.setString(8, cliente.getCep());
+
+                ResultSet rs = stmt.executeQuery();
+
+                if (rs.next()) {
+                    long idGerado = rs.getLong(1);
+
+                    // Lógica da Sigla + ID (ex: ABC00001)
+                    String sigla = cliente.gerarSiglaDoNome();
+                    String codigoFinal = String.format("%s%05d", sigla, idGerado);
+
+                    // Update para gravar o código automático
+                    String sqlUpdate = "UPDATE TB_CLIENTE SET CODIGO_CLIENTE = ? WHERE ID_CLIENTE = ?";
+                    try (PreparedStatement stmtUpdate = conn.prepareStatement(sqlUpdate)) {
+                        stmtUpdate.setString(1, codigoFinal);
+                        stmtUpdate.setLong(2, idGerado);
+                        stmtUpdate.executeUpdate();
+                    }
+
+                    // Atualiza o objeto para o Servlet poder usar depois
+                    cliente.setCodigoCliente(codigoFinal);
+                    cliente.setIdCliente(idGerado);
+                }
+
+                conn.commit(); 
+
+            } catch (SQLException e) {
+                conn.rollback(); // Se falhar o update, desfaz o insert
+                throw e;
+            }
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao cadastrar cliente: " + e.getMessage());
         }

@@ -18,10 +18,6 @@ public class ProdutoBO {
             throw new Exception("O nome do produto é obrigatório!");
         }
 
-        if (produto.getCodigoProduto() == null || produto.getCodigoProduto().trim().isEmpty()) {
-            throw new Exception("O código do produto é obrigatório!");
-        }
-
         if (produto.getPreco() == null || produto.getPreco().compareTo(BigDecimal.ZERO) <= 0) {
             throw new Exception("O preço deve ser maior que R$ 0,00!");
         }
@@ -40,14 +36,14 @@ public class ProdutoBO {
 
         } catch (RuntimeException e) {
 
-            String mensagemErro = e.getMessage().toLowerCase();
-
-            if (mensagemErro.contains("duplicate key") || mensagemErro.contains("unique constraint")) {
-
-                if (mensagemErro.contains("codigo_produto")) {
-                    throw new Exception("Erro: Já existe um produto cadastrado com este Código (" + produto.getCodigoProduto() + ").");
-                }
-            }
+//            String mensagemErro = e.getMessage().toLowerCase();
+//
+//            if (mensagemErro.contains("duplicate key") || mensagemErro.contains("unique constraint")) {
+//
+//                if (mensagemErro.contains("codigo_produto")) {
+//                    throw new Exception("Erro: Já existe um produto cadastrado com este Código (" + produto.getCodigoProduto() + ").");
+//                }
+//            }
 
             throw new Exception("Erro interno ao salvar produto: " + e.getMessage());
         }

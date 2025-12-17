@@ -80,9 +80,11 @@
         <% } %>
     </select>
 
-    <label>Código do Pedido:</label>
+    <label>Código do Pedido (Rastreio):</label>
     <input type="text" name="codigo_pedido"
-           value="<%= entrega != null ? entrega.getCodigoPedido() : "" %>" required />
+           value="<%= (entrega != null && entrega.getCodigoPedido() != null) ? entrega.getCodigoPedido() : "Gerado automaticamente" %>"
+           readonly
+           style="background-color: #e9ecef; color: #6c757d; font-style: italic;" />
 
     <label>Transportadora:</label>
     <input type="text" name="transportadora"

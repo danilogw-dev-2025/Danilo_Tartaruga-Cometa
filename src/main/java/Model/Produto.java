@@ -32,6 +32,13 @@ public class Produto {
         this.quantidade = quantidade;
     }
 
+    public Produto(String nomeProduto, String descricao, BigDecimal preco, Long quantidade) {
+        this.nomeProduto = nomeProduto;
+        this.descricao = descricao;
+        this.preco = preco;
+        this.quantidade = quantidade;
+    }
+
     public Long getIdProduto() {
         return idProduto;
     }
@@ -78,6 +85,26 @@ public class Produto {
 
     public void setQuantidade(Long quantidade) {
         this.quantidade = quantidade;
+    }
+
+    public String gerarSiglaDoProd () {
+        if (this.nomeProduto == null || this.nomeProduto.trim().isEmpty()) {
+            return "PROD"; //default
+        }
+
+        String [] partes = this.nomeProduto.trim().toUpperCase().split("\\s+");
+        StringBuffer sigla = new StringBuffer();
+
+        for (int i = 0; i < Math.min(partes.length, 3); i++ ) {
+            if (!partes[i].isEmpty()) {
+                sigla.append(partes[i].charAt(0));
+            }
+        }
+
+        while(sigla.length() < 3) {
+            sigla.append("X");
+        }
+        return sigla.toString();
     }
 
     public String toString() {
