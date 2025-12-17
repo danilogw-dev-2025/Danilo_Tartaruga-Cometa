@@ -85,6 +85,12 @@ public class EntregaServlet extends HttpServlet {
         String dataEnvio = request.getParameter("data_envio");
         String dataEntrega = request.getParameter("data_entrega");
         String status = request.getParameter("status");
+        String qtdPedidaStr = request.getParameter("qtd_pedida");
+
+        int qtdPedida = 1; // Valor padrão
+        if (qtdPedidaStr != null && !qtdPedidaStr.isEmpty()) {
+            qtdPedida = Integer.parseInt(qtdPedidaStr);
+        }
 
         // Captura os DOIS clientes e o produto
         Long idRemetente = Long.parseLong(request.getParameter("id_remetente"));
@@ -124,7 +130,8 @@ public class EntregaServlet extends HttpServlet {
                 dataEntrega,
                 transportadora,
                 valorFrete,
-                status
+                status,
+                qtdPedida
         );
 
         if (idStr != null && !idStr.isEmpty()) {

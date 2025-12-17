@@ -53,7 +53,7 @@ public class ClienteDAO {
                     cliente.setIdCliente(idGerado);
                 }
 
-                conn.commit(); 
+                conn.commit();
 
             } catch (SQLException e) {
                 conn.rollback(); // Se falhar o update, desfaz o insert
@@ -132,22 +132,21 @@ public class ClienteDAO {
 
 
     public boolean editarCliente(Cliente cliente) {
-        String sql = "UPDATE TB_CLIENTE SET CODIGO_CLIENTE = ?, NOME = ?, DOCUMENTO = ?, ESTADO = ?, CIDADE = ?, BAIRRO = ?, RUA = ?, NUMERO_CASA = ? , CEP = ? " +
+        String sql = "UPDATE TB_CLIENTE SET  NOME = ?, DOCUMENTO = ?, ESTADO = ?, CIDADE = ?, BAIRRO = ?, RUA = ?, NUMERO_CASA = ? , CEP = ? " +
                 "WHERE ID_CLIENTE = ?";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, cliente.getCodigoCliente());
-            stmt.setString(2, cliente.getNome());
-            stmt.setString(3, cliente.getDocumento());
-            stmt.setString(4, cliente.getEstado());
-            stmt.setString(5, cliente.getCidade());
-            stmt.setString(6, cliente.getBairro());
-            stmt.setString(7, cliente.getRua());
-            stmt.setInt(8, cliente.getNumeroCasa());
-            stmt.setString(9, cliente.getCep());
-            stmt.setLong(10, cliente.getIdCliente());
+            stmt.setString(1, cliente.getNome());
+            stmt.setString(2, cliente.getDocumento());
+            stmt.setString(3, cliente.getEstado());
+            stmt.setString(4, cliente.getCidade());
+            stmt.setString(5, cliente.getBairro());
+            stmt.setString(6, cliente.getRua());
+            stmt.setInt(7, cliente.getNumeroCasa());
+            stmt.setString(8, cliente.getCep());
+            stmt.setLong(9, cliente.getIdCliente());
 
 
             int linhasAfetadas = stmt.executeUpdate();

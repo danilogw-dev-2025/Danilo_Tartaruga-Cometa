@@ -125,7 +125,7 @@ public class ProdutoDAO {
     }
 
     public boolean editarProdutos(Produto produto) {
-        String sql = "UPDATE TB_PRODUTO SET CODIGO_PRODUTO = ?, NOME_PRODUTO = ?, " +
+        String sql = "UPDATE TB_PRODUTO SET  NOME_PRODUTO = ?, " +
                 "DESCRICAO = ?, PRECO_PRODUTO = ?, QUANTIDADE = ? " +
                 "WHERE ID_PRODUTO = ?";
 
@@ -133,12 +133,11 @@ public class ProdutoDAO {
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, produto.getCodigoProduto());
-            stmt.setString(2, produto.getNomeProduto());
-            stmt.setString(3, produto.getDescricao());
-            stmt.setBigDecimal(4, produto.getPreco());
-            stmt.setLong(5, produto.getQuantidade());
-            stmt.setLong(6, produto.getIdProduto());
+            stmt.setString(1, produto.getNomeProduto());
+            stmt.setString(2, produto.getDescricao());
+            stmt.setBigDecimal(3, produto.getPreco());
+            stmt.setLong(4, produto.getQuantidade());
+            stmt.setLong(5, produto.getIdProduto());
 
 
             int linhasAfetadas = stmt.executeUpdate();

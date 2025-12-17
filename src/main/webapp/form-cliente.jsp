@@ -43,9 +43,6 @@
         <input type="radio" id="tipoPJ" name="tipoPessoa" value="PJ"> Jurídica (14 n°)
     </div>
 
-    <label>Código:</label>
-    <input type="text" name="codigoCliente" value="${cliente.codigoCliente != null ? cliente.codigoCliente : 'Gerado automaticamente'}" readonly
-    style="background-color: #eee;" />
 
     <label>Nome:</label>
     <input type="text" name="nome" value="${cliente.nome}" required />
@@ -73,7 +70,7 @@
     <label>Rua/Logradouro:</label>
     <input type="text" id="rua" name="rua" value="${cliente.rua}" required />
 
-    <label>Número:</label>
+    <label>Número para residência:</label>
     <input type="number" id="numeroCasa" name="numeroCasa" value="${cliente.numeroCasa}" />
 
     <br>

@@ -14,6 +14,7 @@ public class Entrega {
     private String transportadora;
     private BigDecimal valorFrete;
     private String status;
+    private int qtdPedida;
 
     // Campos apenas para exibição
     private String nomeRemetente;
@@ -25,7 +26,7 @@ public class Entrega {
     public Entrega() {}
 
     public Entrega(Long idEntrega, Long idRemetente, Long idDestinatario, Long idProduto, String codigoPedido,
-                   String dataEnvio, String dataEntrega, String transportadora, BigDecimal valorFrete, String status) {
+                   String dataEnvio, String dataEntrega, String transportadora, BigDecimal valorFrete, String status, int qtdPedida) {
         this.idEntrega = idEntrega;
         this.idRemetente = idRemetente;
         this.idDestinatario = idDestinatario;
@@ -36,10 +37,11 @@ public class Entrega {
         this.transportadora = transportadora;
         this.valorFrete = valorFrete;
         this.status = status;
+        this.qtdPedida = qtdPedida;
     }
 
     public Entrega(Long idRemetente, Long idDestinatario, Long idProduto, String codigoPedido,
-                   String dataEnvio, String dataEntrega, String transportadora, BigDecimal valorFrete, String status) {
+                   String dataEnvio, String dataEntrega, String transportadora, BigDecimal valorFrete, String status, int qtdPedida) {
         this.idRemetente = idRemetente;
         this.idDestinatario = idDestinatario;
         this.idProduto = idProduto;
@@ -49,6 +51,7 @@ public class Entrega {
         this.transportadora = transportadora;
         this.valorFrete = valorFrete;
         this.status = status;
+        this.qtdPedida = qtdPedida;
     }
 
     public BigDecimal getValorFinal() {
@@ -102,6 +105,14 @@ public class Entrega {
     public Long getQuantidadeProduto() { return quantidadeProduto; }
     public void setQuantidadeProduto(Long quantidadeProduto) { this.quantidadeProduto = quantidadeProduto; }
 
+    public int getQtdPedida() {
+        return qtdPedida;
+    }
+
+    public void setQtdPedida(int qtdPedida) {
+        this.qtdPedida = qtdPedida;
+    }
+
     @Override
     public String toString() {
         return "Entrega{" +
@@ -115,6 +126,7 @@ public class Entrega {
                 ", transportadora='" + transportadora + '\'' +
                 ", valorFrete=" + valorFrete +
                 ", status='" + status + '\'' +
+                ", qtdPedida=" + qtdPedida +
                 ", nomeRemetente='" + nomeRemetente + '\'' +
                 ", nomeDestinatario='" + nomeDestinatario + '\'' +
                 ", nomeProduto='" + nomeProduto + '\'' +

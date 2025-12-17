@@ -73,18 +73,15 @@
     <select name="id_produto" required>
         <option value="">-- Selecione --</option>
         <% for (Produto p : listaProdutos) { %>
-            <option value="<%= p.getIdProduto() %>"
+            <option value="<%= p.getIdProduto() %>" data-estoque="<%= p.getQuantidade() %>"
                 <%= (entrega != null && p.getIdProduto().equals(entrega.getIdProduto())) ? "selected" : "" %>>
-                <%= p.getNomeProduto() %>
+                <%= p.getNomeProduto() %> (Estoque: <%= p.getQuantidade() %>)
             </option>
-        <% } %>
+        <% } // Aqui fecha o loop corretamente %>
     </select>
 
-    <label>Código do Pedido (Rastreio):</label>
-    <input type="text" name="codigo_pedido"
-           value="<%= (entrega != null && entrega.getCodigoPedido() != null) ? entrega.getCodigoPedido() : "Gerado automaticamente" %>"
-           readonly
-           style="background-color: #e9ecef; color: #6c757d; font-style: italic;" />
+    <label>Quantidade a Enviar:</label>
+    <input type="number" name="qtd_pedida" min="1" value="<%= (entrega != null) ? entrega.getQtdPedida() : "1" %>" required />
 
     <label>Transportadora:</label>
     <input type="text" name="transportadora"

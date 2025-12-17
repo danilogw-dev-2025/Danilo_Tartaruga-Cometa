@@ -33,7 +33,6 @@
 
 <table>
     <tr>
-        <th>ID</th>
         <th>Código</th>
         <th>Nome</th>
         <th>Descrição</th>
@@ -51,7 +50,6 @@
                }
     %>
         <tr>
-            <td><%= p.getIdProduto() %></td>
             <td><%= p.getCodigoProduto() %></td>
             <td><%= p.getNomeProduto() %></td>
             <td><%= p.getDescricao() %></td>
@@ -73,7 +71,7 @@
     <%   }
        } else { %>
         <tr>
-            <td colspan="9">Nenhum Produto registrado.</td>
+            <td colspan="8">Nenhum Produto registrado.</td>
         </tr>
     <% } %>
 </table>

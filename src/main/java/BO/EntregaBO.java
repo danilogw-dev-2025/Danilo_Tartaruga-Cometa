@@ -1,6 +1,8 @@
 package BO;
 
+import DAO.ClienteDAO;
 import DAO.EntregaDAO;
+import Model.Cliente;
 import Model.Entrega;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -39,6 +41,18 @@ public class EntregaBO {
 
         if (entrega.getStatus() == null || entrega.getStatus().isEmpty()) {
             entrega.setStatus("PENDENTE");
+        }
+
+        ClienteDAO clienteDAO = new ClienteDAO();
+        Cliente remetente = clienteDAO.buscarPorId(entrega.getIdRemetente());
+        Cliente destinatario = clienteDAO.buscarPorId(entrega.getIdDestinatario());
+
+        if (remetente != null && destinatario != null) {
+            boolean mesmoEndereco = remetente.getCep().equals(destinatario.getCep()) &&
+                                    remetente.getNumeroCasa() == destinatario.getNumeroCasa();
+            if (mesmoEndereco) {
+                throw new Exception("Erro: O endereço do Destinatário não pode ser igual ao do Remetente!");
+            }
         }
 
         try {

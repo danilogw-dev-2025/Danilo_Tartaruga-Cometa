@@ -45,15 +45,14 @@
 
 <table>
     <tr>
-        <th>ID</th>
-        <th>Rastreio</th>
+        <th>Cod Rastreio</th>
         <th>Remetente</th>
         <th>Destinatário</th>
         <th>Produto</th>
-        <th>Qtd.</th> <th>Frete</th>
+        <th>Quantidade</th> <th>Frete</th>
         <th>Valor Final</th>
         <th>Envio</th>
-        <th>Entrega</th>
+        <th>Data / Previsão</th>
         <th>Transp.</th>
         <th>Status</th>
         <th>Editar</th>
@@ -65,13 +64,12 @@
                boolean isTravado = "REALIZADA".equals(e.getStatus()) || "CANCELADA".equals(e.getStatus());
     %>
                <tr>
-                   <td><%= e.getIdEntrega() %></td>
                    <td><%= e.getCodigoPedido() %></td>
                    <td><%= e.getNomeRemetente() %></td>
                    <td><%= e.getNomeDestinatario() %></td>
                    <td><%= e.getNomeProduto() %></td>
 
-                   <td><%= e.getQuantidadeProduto() %></td>
+                   <td><%= e.getQtdPedida() %></td>
 
                    <td>R$ <%= e.getValorFrete() %></td>
 
@@ -80,7 +78,19 @@
                    </td>
 
                     <td><%= DataUtils.formatarDataBrasileira(e.getDataEnvio()) %></td>
-                    <td><%= DataUtils.formatarDataBrasileira(e.getDataEntrega()) %></td>
+
+                    <td>
+                        <% if ("REALIZADA".equals(e.getStatus())) { %>
+                            <small style="display:block; color: gray;">Entregue em:</small>
+                            <strong><%= DataUtils.formatarDataBrasileira(e.getDataEntrega()) %></strong>
+                        <% } else if ("CANCELADA".equals(e.getStatus())) { %>
+                            <small style="display:block; color: gray;">Interrompido em:</small>
+                            <span style="text-decoration: line-through;"><%= DataUtils.formatarDataBrasileira(e.getDataEntrega()) %></span>
+                        <% } else { %>
+                            <small style="display:block; color: gray;">Previsão:</small>
+                            <%= DataUtils.formatarDataBrasileira(e.getDataEntrega()) %>
+                        <% } %>
+                    </td>
 
                   <td><%= e.getTransportadora() %></td>
 
@@ -110,7 +120,7 @@
     <%     }
        } else { %>
            <tr>
-               <td colspan="14">Nenhuma entrega cadastrada.</td>
+               <td colspan="13">Nenhuma entrega cadastrada.</td>
            </tr>
     <% } %>
 </table>

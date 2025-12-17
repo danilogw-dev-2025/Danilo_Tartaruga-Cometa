@@ -39,7 +39,6 @@
 
 <table>
     <tr>
-        <th>ID</th>
         <th>Cód. Cliente</th>
         <th>Nome</th>
         <th>Tipo</th>
@@ -47,7 +46,7 @@
         <th>Estado</th>
         <th>Cidade</th>
         <th>Rua</th>
-        <th>Nº</th>
+        <th>Nº para residência</th>
         <th>Editar</th>
         <th>Excluir</th>
     </tr>
@@ -55,7 +54,7 @@
     <% if (lista != null && !lista.isEmpty()) {
            for (Cliente c : lista) { %>
         <tr>
-            <td><%= c.getIdCliente() %></td>
+
             <td><%= c.getCodigoCliente() %></td>
             <td><%= c.getNome() %></td>
 
@@ -84,7 +83,7 @@
     <%   }
        } else { %>
         <tr>
-            <td colspan="11">Nenhum cliente registrado.</td>
+            <td colspan="10">Nenhum cliente registrado.</td>
         </tr>
     <% } %>
 </table>
