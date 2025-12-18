@@ -46,6 +46,11 @@ public class ProdutoServlet extends HttpServlet {
             }
 
             List<Produto> lista = produtoDAO.listarProdutos();
+
+            for (Produto p: lista) {
+                p.setEmUso(produtoDAO.isProdutoVinculado(p.getIdProduto()));
+            }
+
             request.setAttribute("listarProduto", lista);
             RequestDispatcher dispatcher = request.getRequestDispatcher("/lista-produtos.jsp");
             dispatcher.forward(request, response);

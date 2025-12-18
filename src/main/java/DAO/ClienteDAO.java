@@ -132,21 +132,20 @@ public class ClienteDAO {
 
 
     public boolean editarCliente(Cliente cliente) {
-        String sql = "UPDATE TB_CLIENTE SET  NOME = ?, DOCUMENTO = ?, ESTADO = ?, CIDADE = ?, BAIRRO = ?, RUA = ?, NUMERO_CASA = ? , CEP = ? " +
+        String sql = "UPDATE TB_CLIENTE SET  NOME = ?,  ESTADO = ?, CIDADE = ?, BAIRRO = ?, RUA = ?, NUMERO_CASA = ? , CEP = ? " +
                 "WHERE ID_CLIENTE = ?";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, cliente.getNome());
-            stmt.setString(2, cliente.getDocumento());
-            stmt.setString(3, cliente.getEstado());
-            stmt.setString(4, cliente.getCidade());
-            stmt.setString(5, cliente.getBairro());
-            stmt.setString(6, cliente.getRua());
-            stmt.setInt(7, cliente.getNumeroCasa());
-            stmt.setString(8, cliente.getCep());
-            stmt.setLong(9, cliente.getIdCliente());
+            stmt.setString(2, cliente.getEstado());
+            stmt.setString(3, cliente.getCidade());
+            stmt.setString(4, cliente.getBairro());
+            stmt.setString(5, cliente.getRua());
+            stmt.setInt(6, cliente.getNumeroCasa());
+            stmt.setString(7, cliente.getCep());
+            stmt.setLong(8, cliente.getIdCliente());
 
 
             int linhasAfetadas = stmt.executeUpdate();
@@ -177,5 +176,25 @@ public class ClienteDAO {
     }
 
 
+    public boolean possuiEntregasPendentes(Long idCliente) {
+        String sql = "SELECT COUNT(*) FROM TB_ENTREGA " +
+                "WHERE (ID_REMETENTE = ? OR ID_DESTINATARIO = ?) " +
+                "AND STATUS = 'PENDENTE'";
 
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setLong(1, idCliente);
+            stmt.setLong(2, idCliente);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

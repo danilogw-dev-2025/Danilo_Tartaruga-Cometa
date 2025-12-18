@@ -42,10 +42,10 @@
     <input type="hidden" name="idProduto" value="${produto.idProduto}" />
 
     <label for="nomeProduto">Nome do Produto:</label>
-    <input type="text" id="nomeProduto" name="nomeProduto" value="${produto.nomeProduto}" required />
+    <input type="text" id="nomeProduto" name="nomeProduto" maxlength="50" value="${produto.nomeProduto}" required />
 
     <label for="descricao">Descrição do Produto:</label>
-    <input type="text" id="descricao" name="descricao" value="${produto.descricao}" required />
+    <input type="text" id="descricao" name="descricao" maxlength="150" value="${produto.descricao}" required />
 
     <label for="preco">Preço (R$):</label>
     <input type="text" id="preco" name="preco" placeholder="0,00" value="${produto.preco}" />

@@ -12,6 +12,7 @@ public class Cliente {
     private String rua;
     private int numeroCasa;
     private String cep;
+    private boolean bloqueadoParaExclusao;
 
 
     public Cliente() {
@@ -132,6 +133,14 @@ public class Cliente {
 
     public void setCep(String cep) {
         this.cep = cep;
+    }
+
+    public boolean isBloqueadoParaExclusao() {
+        return bloqueadoParaExclusao;
+    }
+
+    public void setBloqueadoParaExclusao(boolean bloqueadoParaExclusao) {
+        this.bloqueadoParaExclusao = bloqueadoParaExclusao;
     }
 
     public String getTipoPessoa() {

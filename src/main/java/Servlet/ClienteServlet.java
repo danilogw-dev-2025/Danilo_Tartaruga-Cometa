@@ -51,6 +51,11 @@ public class ClienteServlet extends HttpServlet {
             }
 
             List<Cliente> lista = clienteDAO.listarClientes();
+
+            for (Cliente c : lista) {
+                c.setBloqueadoParaExclusao(clienteDAO.possuiEntregasPendentes(c.getIdCliente()));
+            }
+
             request.setAttribute("listarCliente", lista);
             RequestDispatcher dispatcher = request.getRequestDispatcher("/lista-clientes.jsp");
             dispatcher.forward(request, response);

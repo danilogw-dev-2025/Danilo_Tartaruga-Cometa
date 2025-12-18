@@ -162,5 +162,20 @@ public class ProdutoDAO {
         }
     }
 
+    public boolean isProdutoVinculado(Long idProduto) {
+        String sql = "SELECT COUNT(*) FROM TB_ENTREGA WHERE ID_PRODUTO = ?";
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setLong(1, idProduto);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0; // Retorna true se houver 1 ou mais entregas
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 
 }

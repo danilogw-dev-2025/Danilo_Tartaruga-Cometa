@@ -59,13 +59,20 @@
             <td style="font-weight: bold;">R$ <%= total %></td>
 
             <td>
-                <a href="<%= request.getContextPath() %>/produto-servlet?action=editar&idProduto=<%= p.getIdProduto() %>">Editar</a>
+                <% if (p.isEmUso()) { %>
+                    <span style="color: gray; cursor: not-allowed;" title="Produto vinculado a entregas">Bloqueado</span>
+                <% } else { %>
+                    <a href="<%= request.getContextPath() %>/produto-servlet?action=editar&idProduto=<%= p.getIdProduto() %>">Editar</a>
+                <% } %>
             </td>
+
             <td>
-                 <a href="<%= request.getContextPath() %>/produto-servlet?action=delete&idProduto=<%= p.getIdProduto() %>"
-                    onclick="return confirm('Deseja realmente excluir?');">
-                    Excluir
-                 </a>
+                <% if (p.isEmUso()) { %>
+                    <span style="color: #ccc; font-style: italic;">🔒 Em uso</span>
+                <% } else { %>
+                    <a href="<%= request.getContextPath() %>/produto-servlet?action=delete&idProduto=<%= p.getIdProduto() %>"
+                       onclick="return confirm('Deseja realmente excluir?');">Excluir</a>
+                <% } %>
             </td>
         </tr>
     <%   }

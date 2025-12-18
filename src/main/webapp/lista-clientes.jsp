@@ -73,10 +73,17 @@
             </td>
 
             <td>
-                <a href="<%= request.getContextPath() %>/cliente-servlet?action=delete&id=<%= c.getIdCliente() %>"
-                   onclick="return confirm('Deseja realmente excluir este cliente?');">
-                   Excluir
-                </a>
+                <% if (c.isBloqueadoParaExclusao()) { %>
+                    <span style="color: #999; cursor: not-allowed;" title="Bloqueado: Este cliente possui entregas pendentes">
+                        🔒 Bloqueado
+                    </span>
+                <% } else { %>
+                    <a href="<%= request.getContextPath() %>/cliente-servlet?action=delete&id=<%= c.getIdCliente() %>"
+                       onclick="return confirm('Deseja realmente excluir este cliente?');"
+                       style="color: #cc0000;">
+                       Excluir
+                    </a>
+                <% } %>
             </td>
 
         </tr>

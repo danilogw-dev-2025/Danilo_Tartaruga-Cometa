@@ -169,7 +169,7 @@ public class EntregaDAO {
 
     public void editarEntrega(Entrega entrega) {
         String sql = "UPDATE TB_ENTREGA SET  ID_REMETENTE=?, ID_DESTINATARIO=?, " +
-                "ID_PRODUTO=?, DATA_ENVIO=?, DATA_ENTREGA=?, TRANSPORTADORA=?, VALOR_FRETE=?, STATUS=? WHERE ID_ENTREGA=?";
+                "ID_PRODUTO=?, DATA_ENVIO=?, DATA_ENTREGA=?, TRANSPORTADORA=?, VALOR_FRETE=?, STATUS=?, QTD_PEDIDA=? WHERE ID_ENTREGA=?";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -182,7 +182,8 @@ public class EntregaDAO {
             stmt.setString(6, entrega.getTransportadora());
             stmt.setBigDecimal(7, entrega.getValorFrete());
             stmt.setString(8, entrega.getStatus());
-            stmt.setLong(9, entrega.getIdEntrega());
+            stmt.setInt(9, entrega.getQtdPedida());
+            stmt.setLong(10, entrega.getIdEntrega());
 
             stmt.executeUpdate();
         } catch (SQLException e) {
@@ -247,6 +248,59 @@ public class EntregaDAO {
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    // MÉTODO 1: Para tratar especificamente o cancelamento
+    public void atualizarStatusECancelarEstoque(Long idEntrega) {
+        String sqlBusca = "SELECT ID_PRODUTO, QTD_PEDIDA FROM TB_ENTREGA WHERE ID_ENTREGA = ?";
+        String sqlUpdateEstoque = "UPDATE TB_PRODUTO SET QUANTIDADE = QUANTIDADE + ? WHERE ID_PRODUTO = ?";
+        String sqlUpdateStatus = "UPDATE TB_ENTREGA SET STATUS = 'CANCELADA' WHERE ID_ENTREGA = ?";
+
+        try (Connection conn = ConnectionFactory.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                int qtdParaDevolver = 0;
+                long idProduto = 0;
+
+                try (PreparedStatement ps = conn.prepareStatement(sqlBusca)) {
+                    ps.setLong(1, idEntrega);
+                    ResultSet rs = ps.executeQuery();
+                    if (rs.next()) {
+                        idProduto = rs.getLong("ID_PRODUTO");
+                        qtdParaDevolver = rs.getInt("QTD_PEDIDA");
+                    }
+                }
+
+                // Devolve ao estoque
+                try (PreparedStatement psUpd = conn.prepareStatement(sqlUpdateEstoque)) {
+                    psUpd.setInt(1, qtdParaDevolver);
+                    psUpd.setLong(2, idProduto);
+                    psUpd.executeUpdate();
+                }
+
+                // Atualiza status
+                try (PreparedStatement psStatus = conn.prepareStatement(sqlUpdateStatus)) {
+                    psStatus.setLong(1, idEntrega);
+                    psStatus.executeUpdate();
+                }
+
+                conn.commit();
+            } catch (Exception e) { conn.rollback(); throw e; }
+        } catch (SQLException e) { throw new RuntimeException(e); }
+    }
+
+    public void ajustarQuantidadeEstoque(Long idProduto, int diferenca) {
+        // Se a diferença for 1 (aumento), o banco faz: estoque = estoque - 1
+        String sql = "UPDATE TB_PRODUTO SET QUANTIDADE = QUANTIDADE - ? WHERE ID_PRODUTO = ?";
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, diferenca);
+            ps.setLong(2, idProduto);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao ajustar estoque na edição: " + e.getMessage());
         }
     }
 

@@ -2,6 +2,7 @@ package BO;
 
 import DAO.ClienteDAO;
 import DAO.EntregaDAO;
+import DAO.ProdutoDAO;
 import Model.Cliente;
 import Model.Entrega;
 import java.math.BigDecimal;
@@ -55,42 +56,68 @@ public class EntregaBO {
             }
         }
 
+        if (entrega.getStatus() == null || entrega.getStatus().isEmpty()) {
+            entrega.setStatus("PENDENTE");
+        }
+
+        // 3. Bloco de Salvamento Único com Inteligência de Estoque
         try {
-
             if (entrega.getIdEntrega() != null && entrega.getIdEntrega() > 0) {
+                // 1. Busca como a entrega ESTÁ no banco antes de alterar
+                Entrega antiga = entregaDAO.buscarPorId(entrega.getIdEntrega());
 
-                Entrega entregaNoBanco = entregaDAO.buscarPorId(entrega.getIdEntrega());
-                if (entregaNoBanco != null) {
-                    if ("REALIZADA".equals(entregaNoBanco.getStatus()) || "CANCELADA".equals(entregaNoBanco.getStatus())) {
-                        throw new Exception("Erro: Não é permitido alterar uma entrega finalizada (" + entregaNoBanco.getStatus() + ").");
+                if (antiga != null) {
+                    // Bloqueio de segurança
+                    if ("REALIZADA".equals(antiga.getStatus()) || "CANCELADA".equals(antiga.getStatus())) {
+                        throw new Exception("Erro: Não é permitido alterar uma entrega finalizada.");
+                    }
+
+                    // CENÁRIO: Mudança de Quantidade (Inteligência de Estoque)
+                    // Se a nova qtd é 2 e a antiga era 1, a diferença é 1.
+                    int diferenca = entrega.getQtdPedida() - antiga.getQtdPedida();
+
+                    if (diferenca != 0) {
+                        // Se for aumento (diferença positiva), checa se tem no estoque
+                        if (diferenca > 0) {
+                            ProdutoDAO produtoDAO = new ProdutoDAO();
+                            Model.Produto p = produtoDAO.buscarPorId(entrega.getIdProduto());
+                            if (p.getQuantidade() < diferenca) {
+                                throw new Exception("Estoque insuficiente! Você precisa de mais " + diferenca + " unidade(s), mas só há " + p.getQuantidade() + " disponível.");
+                            }
+                        }
+                        // Sincroniza o estoque no banco
+                        entregaDAO.ajustarQuantidadeEstoque(entrega.getIdProduto(), diferenca);
                     }
                 }
 
+                // 2. Só agora salva os novos dados da entrega (como a nova quantidade)
                 entregaDAO.editarEntrega(entrega);
 
+
             } else {
+                // --- NOVO CADASTRO ---
                 entregaDAO.cadastrarEntrega(entrega);
             }
 
         } catch (RuntimeException e) {
-            String mensagemErro = e.getMessage().toLowerCase();
-
-            if (mensagemErro.contains("duplicate key") || mensagemErro.contains("unique constraint")) {
-
-                if (mensagemErro.contains("codigo_pedido")) {
-                    throw new Exception("Erro: Já existe uma entrega cadastrada com este Código de Pedido (" + entrega.getCodigoPedido() + ").");
-                }
+            // Tratamento de erros de banco (Unique Constraints, etc)
+            String msg = e.getMessage().toLowerCase();
+            if (msg.contains("codigo_pedido")) {
+                throw new Exception("Erro: Já existe uma entrega com este Código de Rastreio.");
             }
-
-            throw new Exception("Erro interno ao salvar entrega: " + e.getMessage());
+            throw new Exception("Erro interno ao salvar: " + e.getMessage());
         }
     }
 
     public void deletar(Long id) throws Exception {
         Entrega entregaNoBanco = entregaDAO.buscarPorId(id);
-        if (entregaNoBanco != null && "REALIZADA".equals(entregaNoBanco.getStatus())) {
+        if (entregaNoBanco == null) throw new Exception("Entrega não encontrada.");
+
+        if ("REALIZADA".equals(entregaNoBanco.getStatus())) {
             throw new Exception("Erro: Não é permitido excluir uma entrega REALIZADA.");
         }
-        entregaDAO.deletarEntrega(id);
+
+        // Altere para o método que você criou com inteligência de estoque:
+        entregaDAO.deletarEntregaComDevolucao(id);
     }
 }

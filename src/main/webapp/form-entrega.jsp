@@ -84,7 +84,7 @@
     <input type="number" name="qtd_pedida" min="1" value="<%= (entrega != null) ? entrega.getQtdPedida() : "1" %>" required />
 
     <label>Transportadora:</label>
-    <input type="text" name="transportadora"
+    <input type="text" name="transportadora" maxlength="50"
            value="<%= entrega != null ? entrega.getTransportadora() : "" %>" required />
 
     <label>Data de Envio:</label>

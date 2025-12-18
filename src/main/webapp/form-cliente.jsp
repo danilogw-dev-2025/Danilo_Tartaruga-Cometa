@@ -45,11 +45,25 @@
 
 
     <label>Nome:</label>
-    <input type="text" name="nome" value="${cliente.nome}" required />
+    <input type="text" name="nome" maxlength="70" value="${cliente.nome}" required />
 
     <label>Documento (CPF/CNPJ):</label>
-    <input type="text" id="documento" name="documento" value="${cliente.documento}" required />
+    <input type="text"
+           id="documento"
+           name="documento"
+           value="${cliente.documento}"
+           required
+           <%-- Lógica de bloqueio: se houver ID, o campo fica apenas leitura --%>
+           ${(not empty cliente.idCliente and cliente.idCliente > 0) ? 'readonly' : ''}
+           <%-- Estilo visual para indicar que está bloqueado --%>
+           style="${(not empty cliente.idCliente and cliente.idCliente > 0) ? 'background-color: #e9ecef; cursor: not-allowed;' : ''}"
+    />
     <small id="erroDocumento" style="color: #dc3545; display: none;"></small>
+
+    <%-- Pequeno aviso informativo opcional --%>
+    <c:if test="${not empty cliente.idCliente and cliente.idCliente > 0}">
+        <small style="color: #6c757d; display: block;">O documento não pode ser alterado após o cadastro.</small>
+    </c:if>
 
 
     <label>CEP:</label>
@@ -59,19 +73,19 @@
     <small id="erroCep" style="color: #dc3545; display: none;">CEP inválido ou não encontrado.</small>
 
     <label>Estado (UF):</label>
-    <input type="text" id="estado" name="estado" value="${cliente.estado}" required />
+    <input type="text" id="estado" name="estado" maxlength="2" value="${cliente.estado}" required />
 
     <label>Cidade:</label>
-    <input type="text" id="cidade" name="cidade" value="${cliente.cidade}" required />
+    <input type="text" id="cidade" name="cidade" maxlength="50" value="${cliente.cidade}" required />
 
     <label>Bairro:</label>
-    <input type="text" id="bairro" name="bairro" value="${cliente.bairro}" required />
+    <input type="text" id="bairro" name="bairro" maxlength="50" value="${cliente.bairro}" required />
 
     <label>Rua/Logradouro:</label>
-    <input type="text" id="rua" name="rua" value="${cliente.rua}" required />
+    <input type="text" id="rua" name="rua" maxlength="50"  value="${cliente.rua}" required />
 
     <label>Número para residência:</label>
-    <input type="number" id="numeroCasa" name="numeroCasa" value="${cliente.numeroCasa}" />
+    <input type="number" id="numeroCasa" name="numeroCasa" max="5" value="${cliente.numeroCasa}" />
 
     <br>
     <button type="submit">Salvar</button>

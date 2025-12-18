@@ -10,6 +10,7 @@ public class Produto {
     private String descricao;
     private BigDecimal preco;
     private Long quantidade;
+    private boolean emUso;
 
     public  Produto() {
 
@@ -85,6 +86,14 @@ public class Produto {
 
     public void setQuantidade(Long quantidade) {
         this.quantidade = quantidade;
+    }
+
+    public boolean isEmUso() {
+        return emUso;
+    }
+
+    public void setEmUso(boolean emUso) {
+        this.emUso = emUso;
     }
 
     public String gerarSiglaDoProd () {
