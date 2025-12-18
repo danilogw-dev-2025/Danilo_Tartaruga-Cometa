@@ -2,6 +2,21 @@ package Model;
 
 import java.math.BigDecimal;
 
+/**
+ * Classe de Modelo (Model) para a entidade Entrega.
+
+ * 1. Objeto de Composição: Atua como o elo entre Clientes (Remetente/Destinatário)
+ * e Produtos, carregando as chaves estrangeiras (FKs) necessárias para a integridade referencial.
+ * 2. Lógica Financeira Centralizada: O metodo 'getValorFinal' encapsula a regra
+ * de soma (Valor do Produto * Qtd + Frete), garantindo que o cálculo seja único
+ * em todo o sistema.
+ * 3. Suporte à Exibição (Campos Transientes): Possui atributos auxiliares para
+ * armazenar nomes vindos de outras tabelas, evitando múltiplas consultas ao banco
+ * durante a renderização de listas.
+ * 4. Rastreabilidade: Gerencia o ciclo de vida do pedido através do 'codigoPedido'
+ * (Rastreio) e do 'status' (Pendente, Realizada, Cancelada).
+ */
+
 public class Entrega {
 
     private Long idEntrega;

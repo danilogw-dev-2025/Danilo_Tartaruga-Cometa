@@ -4,6 +4,18 @@ import DAO.ProdutoDAO;
 import Model.Produto;
 import java.math.BigDecimal;
 
+/**
+ * Camada de Negócio (Business Object) para Gestão de Produtos.
+ * 1. Validação Comercial: Impede a entrada de produtos sem nome ou com
+ * preço/quantidade zerados ou negativos, garantindo a saúde do fluxo de caixa.
+ * 2. Consistência de Dados: Assegura que campos obrigatórios (Nome, Preço, Qtd)
+ * estejam presentes tanto na criação quanto na edição.
+ * 3. Abstração de Persistência: Centraliza a decisão entre 'Insert' ou 'Update'
+ * baseada na presença do ID, protegendo o DAO de chamadas ambíguas.
+ * 4. Isolamento de Erros: Captura exceções de tempo de execução do Banco de Dados
+ * e as converte em mensagens de erro controladas para a interface do usuário.
+ */
+
 public class ProdutoBO {
 
     private ProdutoDAO produtoDAO;
@@ -35,16 +47,6 @@ public class ProdutoBO {
             }
 
         } catch (RuntimeException e) {
-
-//            String mensagemErro = e.getMessage().toLowerCase();
-//
-//            if (mensagemErro.contains("duplicate key") || mensagemErro.contains("unique constraint")) {
-//
-//                if (mensagemErro.contains("codigo_produto")) {
-//                    throw new Exception("Erro: Já existe um produto cadastrado com este Código (" + produto.getCodigoProduto() + ").");
-//                }
-//            }
-
             throw new Exception("Erro interno ao salvar produto: " + e.getMessage());
         }
     }

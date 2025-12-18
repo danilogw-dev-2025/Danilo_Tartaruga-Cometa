@@ -1,5 +1,18 @@
 package Model;
 
+/**
+ * Classe de Modelo (Model) para a entidade Cliente.
+ * 1. Representação de Estado: Encapsula todos os atributos do cliente, desde o
+ * ID interno do banco até o estado de 'bloqueio' para exclusão lógica na UI.
+ * 2. Inteligência de Domínio: Implementa a regra de geração de siglas (ex: João Silva -> JSA),
+ * garantindo padronização na criação dos códigos de identificação.
+ * 3. Polimorfismo de Documento: O metodo 'getTipoPessoa' deriva automaticamente
+ * se o cliente é PF ou PJ baseando-se no comprimento da string do documento.
+ * 4. Sobrecarga de Construtores: Oferece flexibilidade para criar instâncias em
+ * diferentes momentos (ex: antes de salvar, sem ID; ou ao listar, com todos os dados).
+ * 5. Desacoplamento: Serve como o 'contrato' de dados que une o Servlet, o BO e o DAO.
+ */
+
 public class Cliente {
 
     private Long idCliente;
@@ -176,7 +189,6 @@ public class Cliente {
         }
         return sigla.toString();
     }
-
 
 
     @Override

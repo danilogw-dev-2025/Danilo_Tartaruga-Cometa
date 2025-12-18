@@ -14,6 +14,21 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 
+/**
+ * Controlador (Servlet) para a entidade Produto.
+
+ * 1. Controle de Estado (GET): Consulta dependências de entregas para cada produto
+ * da lista, habilitando ou desabilitando ações de exclusão conforme a regra de negócio.
+ * 2. Conversão Financeira (POST): Processa strings provenientes de máscaras jQuery (R$ 0.000,00),
+ * limpando caracteres não numéricos para a correta instanciação de objetos BigDecimal.
+ * 3. Gerenciamento de Formulário: Suporta tanto a criação de novos itens quanto a
+ * edição de existentes, recuperando dados pelo ID e encaminhando ao 'form-produto.jsp'.
+ * 4. Tratamento de Exceções: Em caso de falha na persistência, mantém o estado do
+ * objeto 'produto' na requisição para que o usuário não perca os dados digitados ao retornar ao formulário.
+ * 5. Redirecionamento Padrão: Implementa o fluxo 'PRG' (Post-Redirect-Get) para
+ * evitar duplicidade de cadastros ao atualizar o navegador.
+ */
+
 @WebServlet("/produto-servlet")
 public class ProdutoServlet extends HttpServlet {
 
@@ -102,10 +117,10 @@ public class ProdutoServlet extends HttpServlet {
             ProdutoBO produtoBO = new ProdutoBO();
             produtoBO.salvar(produto);
 
-            response.sendRedirect(request.getContextPath() + "/produto-servlet");
+            response.sendRedirect(request.getContextPath() + "/produto-servlet?status=sucesso");
 
         } catch (Exception e) {
-            // ERRO DE REGRA DE NEGÓCIO (bo)
+            response.sendRedirect(request.getContextPath() + "/produto-servlet?status=erro");
             request.setAttribute("erroMsg", e.getMessage());
             request.setAttribute("produto", produto);
 

@@ -8,6 +8,21 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Camada de Acesso a Dados (DAO) para Gestão de Produtos e Inventário.
+ *
+ * 1. Ciclo de Vida do Produto: Gerencia desde a inserção com geração de código
+ * alfanumérico automático até a exclusão física do registro.
+ * 2. Transacionalidade Atômica: Garante que a criação do ID e a gravação do
+ * código customizado ocorram em um único bloco, revertendo em caso de erro técnico.
+ * 3. Integridade de Catálogo: O metodo 'isProdutoVinculado' atua como uma
+ * Foreign Key lógica, impedindo que produtos com histórico de entregas sejam removidos.
+ * 4. Tipagem Precisa: Utiliza 'BigDecimal' para o tratamento de preços, evitando
+ * erros de arredondamento comuns em cálculos financeiros de estoque.
+ * 5. Mapeamento de ResultSet: Transforma dados tabulares do SQL em objetos da
+ * classe Model Produto para facilitar a manipulação nas camadas BO e Servlet.
+ */
+
 public class ProdutoDAO {
 
     public void cadastrarProduto(Produto produto) {
@@ -169,7 +184,7 @@ public class ProdutoDAO {
             stmt.setLong(1, idProduto);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getInt(1) > 0; // Retorna true se houver 1 ou mais entregas
+                    return rs.getInt(1) > 0;
                 }
             }
         } catch (SQLException e) {

@@ -3,6 +3,15 @@ package BO;
 import DAO.ClienteDAO;
 import Model.Cliente;
 
+/**
+ * Camada de Negócio (Business Object) para Clientes.
+ * 1. Validação Estrutural: Garante que nomes não sejam vazios e documentos tenham o tamanho correto.
+ * 2. Higienização de Dados: Remove caracteres não numéricos de CPF/CNPJ antes da persistência.
+ * 3. Abstração de Erros de Banco: Captura RuntimeExceptions do DAO (ex: restrições UNIQUE)
+ * e as relança como Exception com mensagens legíveis para o Front-end.
+ * 4. Orquestração de Fluxo: Decide entre cadastrar (novo) ou editar (ID existente) de forma transparente.
+ */
+
 public class ClienteBO {
 
     private ClienteDAO clienteDAO;

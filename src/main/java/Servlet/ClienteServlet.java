@@ -10,13 +10,24 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.List;
+
+/**
+ * Controlador (Servlet) para a entidade Cliente.
+
+ * 1. Gerenciamento de Ações (GET): Utiliza o parâmetro 'action' para alternar entre
+ * listagem, carregamento de formulário de edição e comandos de exclusão.
+ * 2. Segurança na Listagem: Antes de encaminhar para o JSP, popula o atributo
+ * 'bloqueadoParaExclusao' consultando o DAO para proteger a integridade referencial.
+ * 3. Encaminhamento de Dados (RequestDispatcher): Usa 'forward' para manter os
+ * objetos na requisição, permitindo que mensagens de erro e dados preenchidos
+ * retornem ao formulário em caso de falha.
+ * 4. Normalização de Entrada (POST): Trata conversões de tipos (String para Integer/Long)
+ * com blocos try-catch para evitar que erros de digitação derrubem o servidor.
+ * 5. Redirecionamento (Post-Redirect-Get): Após o sucesso, utiliza 'sendRedirect'
+ * para limpar o cache da requisição e evitar envios duplicados ao atualizar a página.
+ */
 
 @WebServlet("/cliente-servlet")
 public class ClienteServlet extends HttpServlet {
@@ -109,11 +120,10 @@ public class ClienteServlet extends HttpServlet {
         try {
             ClienteBO clienteBO = new ClienteBO();
             clienteBO.salvar(cliente);
-
-            response.sendRedirect(request.getContextPath() + "/cliente-servlet");
+            response.sendRedirect(request.getContextPath() + "/cliente-servlet?status=sucesso");
 
         } catch (Exception e) {
-
+            response.sendRedirect(request.getContextPath() + "/form-cliente.jsp?status=erro");
             request.setAttribute("erroMsg", e.getMessage());
             request.setAttribute("cliente", cliente);
 

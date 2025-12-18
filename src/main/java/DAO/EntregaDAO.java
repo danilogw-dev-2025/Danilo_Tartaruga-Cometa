@@ -10,13 +10,26 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Camada de Acesso a Dados (DAO) para Logística e Inventário.
+ * 1. Integridade Transacional: Utiliza transações JDBC para garantir que a
+ * criação da entrega e a baixa no estoque ocorram como uma operação única.
+ * 2. Inteligência de Rastreio: Implementa lógica pós-insert para gerar e
+ * gravar o código 'ENC' (Encomenda) baseado no ID serial gerado pelo banco.
+ * 3. Consultas com Join: O metodo 'listarEntregas' realiza múltiplos INNER JOINs
+ * para consolidar dados de Clientes e Produtos, reduzindo a carga no Servlet.
+ * 4. Gestão de Devolução: O metodo 'deletarEntregaComDevolucao' garante que
+ * itens de pedidos cancelados ou excluídos retornem automaticamente ao saldo do produto.
+ * 5. Ajuste de Diferencial: Implementa 'ajustarQuantidadeEstoque' para sincronizar
+ * flutuações de quantidade durante edições sem corromper o estoque total.
+ */
+
 public class EntregaDAO {
 
     public void cadastrarEntrega(Entrega entrega) {
-        // SQLs preparados
+
         String sqlCheckEstoque = "SELECT QUANTIDADE FROM TB_PRODUTO WHERE ID_PRODUTO = ?";
 
-        // Incluí todas as colunas necessárias, incluindo DATA_ENTREGA e TRANSPORTADORA que faltavam
         String sqlInsertEntrega = "INSERT INTO TB_ENTREGA (ID_REMETENTE, ID_DESTINATARIO, ID_PRODUTO, " +
                 "QTD_PEDIDA, DATA_ENVIO, DATA_ENTREGA, TRANSPORTADORA, VALOR_FRETE, STATUS) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING ID_ENTREGA";
@@ -24,10 +37,10 @@ public class EntregaDAO {
         String sqlUpdateEstoque = "UPDATE TB_PRODUTO SET QUANTIDADE = QUANTIDADE - ? WHERE ID_PRODUTO = ?";
 
         try (Connection conn = ConnectionFactory.getConnection()) {
-            conn.setAutoCommit(false); // Início da transação
+            conn.setAutoCommit(false);
 
             try {
-                // 1. Verificar estoque
+
                 int estoqueAtual = 0;
                 try (PreparedStatement stmtEstoque = conn.prepareStatement(sqlCheckEstoque)) {
                     stmtEstoque.setLong(1, entrega.getIdProduto());
@@ -39,7 +52,6 @@ public class EntregaDAO {
                     throw new RuntimeException("Estoque insuficiente! Disponível: " + estoqueAtual);
                 }
 
-                // 2. Inserir Entrega e obter o ID gerado
                 long idGerado = 0;
                 try (PreparedStatement stmtIns = conn.prepareStatement(sqlInsertEntrega)) {
                     stmtIns.setLong(1, entrega.getIdRemetente());
@@ -50,13 +62,13 @@ public class EntregaDAO {
                     stmtIns.setDate(6, Date.valueOf(entrega.getDataEntrega()));
                     stmtIns.setString(7, entrega.getTransportadora());
                     stmtIns.setBigDecimal(8, entrega.getValorFrete());
-                    stmtIns.setString(9, "PENDENTE"); // Certifique-se de que o 9º parâmetro existe
+                    stmtIns.setString(9, "PENDENTE");
 
                     ResultSet rs = stmtIns.executeQuery();
                     if (rs.next()) idGerado = rs.getLong(1);
                 }
 
-                // 3. Gerar e Gravar Código de Rastreio (ENC...)
+                //  Gerar e Gravar Código de Rastreio (ENC...)
                 int anoAtual = LocalDate.now().getYear();
                 String codigoRastreio = String.format("ENC%d%05d", anoAtual, idGerado);
 
@@ -67,21 +79,20 @@ public class EntregaDAO {
                     stmtCod.executeUpdate();
                 }
 
-                // 4. Baixa no Estoque do Produto
+                //  Baixa no Estoque do Produto
                 try (PreparedStatement stmtUpdEstoque = conn.prepareStatement(sqlUpdateEstoque)) {
                     stmtUpdEstoque.setInt(1, entrega.getQtdPedida());
                     stmtUpdEstoque.setLong(2, entrega.getIdProduto());
                     stmtUpdEstoque.executeUpdate();
                 }
 
-                // Atualiza o objeto para retorno
                 entrega.setCodigoPedido(codigoRastreio);
                 entrega.setIdEntrega(idGerado);
 
-                conn.commit(); // Salva todas as operações se nada falhou
+                conn.commit();
 
             } catch (Exception e) {
-                conn.rollback(); // Cancela tudo se houver qualquer erro
+                conn.rollback();
                 throw e;
             }
         } catch (SQLException e) {
@@ -91,7 +102,7 @@ public class EntregaDAO {
 
     public List<Entrega> listarEntregas() {
         String sql = "SELECT E.*, R.NOME AS NOME_REMETENTE, D.NOME AS NOME_DESTINATARIO, " +
-                "P.NOME_PRODUTO, P.PRECO_PRODUTO, P.QUANTIDADE, E.QTD_PEDIDA " + // Adicionado P.QUANTIDADE aqui
+                "P.NOME_PRODUTO, P.PRECO_PRODUTO, P.QUANTIDADE, E.QTD_PEDIDA " +
                 "FROM TB_ENTREGA E " +
                 "INNER JOIN TB_CLIENTE R ON E.ID_REMETENTE = R.ID_CLIENTE " +
                 "INNER JOIN TB_CLIENTE D ON E.ID_DESTINATARIO = D.ID_CLIENTE " +
@@ -124,11 +135,9 @@ public class EntregaDAO {
                 entrega.setNomeProduto(rs.getString("NOME_PRODUTO"));
                 entrega.setQtdPedida(rs.getInt("QTD_PEDIDA"));
 
-                // Preenche a Quantidade e Calcula Total
                 BigDecimal preco = rs.getBigDecimal("PRECO_PRODUTO");
                 int qtdEnviada = rs.getInt("QTD_PEDIDA");
                 if (preco != null) {
-                    // Multiplica o preço pela quantidade da entrega, não pelo estoque total
                     entrega.setValorTotalProduto(preco.multiply(new BigDecimal(qtdEnviada)));
                 }
                 entregas.add(entrega);
@@ -201,21 +210,18 @@ public class EntregaDAO {
     }
 
     public void deletarEntregaComDevolucao(Long id) {
-        // SQL para descobrir qual produto e qual quantidade devolver
+
         String sqlBusca = "SELECT ID_PRODUTO, QTD_PEDIDA FROM TB_ENTREGA WHERE ID_ENTREGA = ?";
-        // SQL para devolver os itens ao estoque do produto
         String sqlDevolverEstoque = "UPDATE TB_PRODUTO SET QUANTIDADE = QUANTIDADE + ? WHERE ID_PRODUTO = ?";
-        // SQL para deletar a entrega de fato
         String sqlDelete = "DELETE FROM TB_ENTREGA WHERE ID_ENTREGA = ?";
 
         try (Connection conn = ConnectionFactory.getConnection()) {
-            conn.setAutoCommit(false); // Inicia transação (Tudo ou Nada)
+            conn.setAutoCommit(false);
 
             try {
                 long idProduto = 0;
                 int qtdParaDevolver = 0;
 
-                // 1. Busca os dados da entrega antes de apagá-la
                 try (PreparedStatement stmtBusca = conn.prepareStatement(sqlBusca)) {
                     stmtBusca.setLong(1, id);
                     try (ResultSet rs = stmtBusca.executeQuery()) {
@@ -241,9 +247,9 @@ public class EntregaDAO {
                     stmtDel.executeUpdate();
                 }
 
-                conn.commit(); // Confirma as duas operações no banco
+                conn.commit();
             } catch (Exception e) {
-                conn.rollback(); // Se algo falhar, desfaz a devolução e a deleção
+                conn.rollback();
                 throw new RuntimeException("Erro ao deletar e devolver estoque: " + e.getMessage());
             }
         } catch (SQLException e) {
@@ -251,7 +257,7 @@ public class EntregaDAO {
         }
     }
 
-    // MÉTODO 1: Para tratar especificamente o cancelamento
+
     public void atualizarStatusECancelarEstoque(Long idEntrega) {
         String sqlBusca = "SELECT ID_PRODUTO, QTD_PEDIDA FROM TB_ENTREGA WHERE ID_ENTREGA = ?";
         String sqlUpdateEstoque = "UPDATE TB_PRODUTO SET QUANTIDADE = QUANTIDADE + ? WHERE ID_PRODUTO = ?";

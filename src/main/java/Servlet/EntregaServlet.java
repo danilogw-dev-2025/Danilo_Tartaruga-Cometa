@@ -18,6 +18,19 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 
+/**
+ * Controlador (Servlet) para a entidade Entrega.
+ * 1. Preparação de Contexto (GET): Nas ações 'novo' e 'editar', o servlet realiza
+ * múltiplas consultas (Clientes e Produtos) para popular os campos de seleção do formulário.
+ * 2. Parsing de Moeda: Implementa lógica robusta para remover símbolos (R$),
+ * pontos de milhar e converter vírgulas em pontos antes da persistência do frete.
+ * 3. Gerenciamento de Exceções de Negócio: Captura erros lançados pelo EntregaBO
+ * (como falta de estoque ou datas inválidas) e os reencaminha para a View com feedback claro.
+ * 4. Orquestração de Relacionamentos: Captura múltiplos IDs estrangeiros (FKs)
+ * da requisição e reconstrói o objeto de domínio Entrega para processamento.
+ * 5. Navegação Condicional: Redireciona o fluxo baseado no sucesso da operação,
+ * utilizando parâmetros de URL (?status=sucesso) para disparar alertas visuais no JSP.
+ */
 @WebServlet("/entrega-servlet")
 public class EntregaServlet extends HttpServlet {
 
@@ -97,26 +110,18 @@ public class EntregaServlet extends HttpServlet {
         Long idDestinatario = Long.parseLong(request.getParameter("id_destinatario"));
         Long idProduto = Long.parseLong(request.getParameter("id_produto"));
 
-        // --- LÓGICA DE TRATAMENTO DA MÁSCARA DO FRETE ---
         String valorFreteComMascara = request.getParameter("valor_frete");
         BigDecimal valorFrete = BigDecimal.ZERO;
 
         if (valorFreteComMascara != null && !valorFreteComMascara.isEmpty()) {
             try {
-                // Remove o prefixo e espaços, ex: "R$ 1.234,56" -> "1.234,56"
+
                 String valorLimpo = valorFreteComMascara.replace("R$", "").trim();
-
-                // Remove os separadores de milhar, ex: "1.234,56" -> "1234,56"
                 valorLimpo = valorLimpo.replace(".", "");
-
-                // Substitui a vírgula decimal por ponto, ex: "1234,56" -> "1234.56"
                 valorLimpo = valorLimpo.replace(",", ".");
-
                 valorFrete = new BigDecimal(valorLimpo);
 
             } catch (NumberFormatException e) {
-                // Trata o erro se o valor não puder ser convertido (útil para feedback ao usuário)
-                // Se houver erro, a lógica de erro abaixo tratará.
                 throw new ServletException("O valor do frete está em um formato inválido. Use apenas números.");
             }
         }
@@ -142,7 +147,7 @@ public class EntregaServlet extends HttpServlet {
             EntregaBO entregaBO = new EntregaBO();
             entregaBO.salvar(entrega);
 
-            response.sendRedirect(request.getContextPath() + "/entrega-servlet");
+            response.sendRedirect(request.getContextPath() + "/entrega-servlet?status=sucesso");
 
         } catch (Exception e) {
             ClienteDAO clienteDAO = new ClienteDAO();
@@ -150,7 +155,7 @@ public class EntregaServlet extends HttpServlet {
 
             request.setAttribute("listaClientes", clienteDAO.listarClientes());
             request.setAttribute("listaProdutos", produtoDAO.listarProdutos());
-
+            response.sendRedirect(request.getContextPath() + "/form-entrega.jsp?status=erro");
             request.setAttribute("erroMsg", e.getMessage());
             request.setAttribute("entrega", entrega);
 

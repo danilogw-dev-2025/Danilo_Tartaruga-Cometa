@@ -3,7 +3,6 @@
 <%@ page import="Model.Cliente" %>
 
 <%
-    // Recupera a lista enviada pelo ClienteServlet
     List<Cliente> lista = (List<Cliente>) request.getAttribute("listarCliente");
 %>
 
@@ -12,6 +11,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Lista de Clientes</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; }
         h1 { color: #333; }
@@ -78,8 +81,10 @@
                         🔒 Bloqueado
                     </span>
                 <% } else { %>
-                    <a href="<%= request.getContextPath() %>/cliente-servlet?action=delete&id=<%= c.getIdCliente() %>"
-                       onclick="return confirm('Deseja realmente excluir este cliente?');"
+                    <a href="#"
+                       class="btn-excluir"
+                       data-id="<%= c.getIdCliente() %>"
+                       data-nome="<%= c.getNome() %>"
                        style="color: #cc0000;">
                        Excluir
                     </a>
@@ -95,5 +100,39 @@
     <% } %>
 </table>
 
+<script>
+$(document).ready(function() {
+    $('.btn-excluir').on('click', function(e) {
+        e.preventDefault();
+
+        const id = $(this).data('id');
+        const nome = $(this).data('nome');
+
+        Swal.fire({
+            title: 'Confirmar exclusão',
+            text: "Deseja realmente excluir o cliente " + nome + "?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sim, excluir!',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: "Deletado!",
+                    text: "Cliente Deletado da Base de Dados.",
+                    icon: "success",
+                    confirmButtonText: "Ok"
+                }).then(() => {
+                    window.location.href = '<%= request.getContextPath() %>/cliente-servlet?action=delete&id=' + id;
+                });
+            }
+        });
+    });
+});
+</script>
+<%@ include file="alerta_toast.jsp" %>
 </body>
 </html>

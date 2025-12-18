@@ -10,6 +10,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Lista de Entregas</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; }
         h1 { color: #333; }
@@ -49,7 +53,8 @@
         <th>Remetente</th>
         <th>Destinatário</th>
         <th>Produto</th>
-        <th>Quantidade</th> <th>Frete</th>
+        <th>Quantidade</th>
+        <th>Frete</th>
         <th>Valor Final</th>
         <th>Envio</th>
         <th>Data / Previsão</th>
@@ -68,9 +73,7 @@
                    <td><%= e.getNomeRemetente() %></td>
                    <td><%= e.getNomeDestinatario() %></td>
                    <td><%= e.getNomeProduto() %></td>
-
                    <td><%= e.getQtdPedida() %></td>
-
                    <td>R$ <%= e.getValorFrete() %></td>
 
                    <td style="font-weight: bold; background-color: #e8f5e9;">
@@ -110,8 +113,11 @@
                        <% if ("REALIZADA".equals(e.getStatus())) { %>
                            <span class="bloqueado">Bloqueado</span>
                        <% } else { %>
-                           <a href="<%= request.getContextPath() %>/entrega-servlet?action=delete&idEntrega=<%= e.getIdEntrega() %>"
-                              onclick="return confirm('Deseja realmente excluir?');">
+                           <a href="#"
+                              class="btn-excluir"
+                              data-id="<%= e.getIdEntrega() %>"
+                              data-rastreio="<%= e.getCodigoPedido() %>"
+                              style="color: #cc0000;">
                               Excluir
                            </a>
                        <% } %>
@@ -125,5 +131,39 @@
     <% } %>
 </table>
 
+<script>
+$(document).ready(function() {
+    $('.btn-excluir').on('click', function(e) {
+        e.preventDefault();
+
+        const id = $(this).data('id');
+        const rastreio = $(this).data('rastreio');
+
+        Swal.fire({
+            title: 'Excluir entrega?',
+            text: "Deseja realmente excluir a entrega " + rastreio + "? O estoque será devolvido automaticamente.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sim, excluir!',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+               Swal.fire({
+               title: "Deletada!",
+               text: "Entrega Deletada da Base de Dados.",
+               icon: "success",
+               confirmButtonText: "Ok"
+               }).then(() => {
+                window.location.href = '<%= request.getContextPath() %>/entrega-servlet?action=delete&idEntrega=' + id;
+            });
+           }
+        });
+    });
+});
+</script>
+<%@ include file="alerta_toast.jsp" %>
 </body>
 </html>

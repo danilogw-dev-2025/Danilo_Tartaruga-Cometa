@@ -8,6 +8,18 @@ import Model.Entrega;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+/**
+ * Camada de Negócio (Business Object) para Entregas e Logística.
+ * 1. Validação Logística: Impede datas retroativas (entrega antes do envio) e veda
+ * envios para o mesmo endereço/pessoa (Remetente = Destinatário).
+ * 2. Inteligência de Estoque: No 'Update', calcula a diferença de
+ * quantidade e valida se há saldo disponível antes de autorizar a alteração.
+ * 3. Imutabilidade de Status: Protege registros 'REALIZADOS' ou 'CANCELADOS' contra
+ * edições acidentais, preservando o histórico auditável.
+ * 4. Consistência na Deleção: Garante que, ao excluir uma entrega pendente,
+ * os itens retornem automaticamente ao estoque (Devolução de Inventário).
+ */
+
 public class EntregaBO {
 
     private EntregaDAO entregaDAO;
@@ -60,14 +72,12 @@ public class EntregaBO {
             entrega.setStatus("PENDENTE");
         }
 
-        // 3. Bloco de Salvamento Único com Inteligência de Estoque
+
         try {
             if (entrega.getIdEntrega() != null && entrega.getIdEntrega() > 0) {
-                // 1. Busca como a entrega ESTÁ no banco antes de alterar
                 Entrega antiga = entregaDAO.buscarPorId(entrega.getIdEntrega());
 
                 if (antiga != null) {
-                    // Bloqueio de segurança
                     if ("REALIZADA".equals(antiga.getStatus()) || "CANCELADA".equals(antiga.getStatus())) {
                         throw new Exception("Erro: Não é permitido alterar uma entrega finalizada.");
                     }
@@ -89,18 +99,13 @@ public class EntregaBO {
                         entregaDAO.ajustarQuantidadeEstoque(entrega.getIdProduto(), diferenca);
                     }
                 }
-
-                // 2. Só agora salva os novos dados da entrega (como a nova quantidade)
                 entregaDAO.editarEntrega(entrega);
 
-
             } else {
-                // --- NOVO CADASTRO ---
                 entregaDAO.cadastrarEntrega(entrega);
             }
 
         } catch (RuntimeException e) {
-            // Tratamento de erros de banco (Unique Constraints, etc)
             String msg = e.getMessage().toLowerCase();
             if (msg.contains("codigo_pedido")) {
                 throw new Exception("Erro: Já existe uma entrega com este Código de Rastreio.");
@@ -117,7 +122,6 @@ public class EntregaBO {
             throw new Exception("Erro: Não é permitido excluir uma entrega REALIZADA.");
         }
 
-        // Altere para o método que você criou com inteligência de estoque:
         entregaDAO.deletarEntregaComDevolucao(id);
     }
 }

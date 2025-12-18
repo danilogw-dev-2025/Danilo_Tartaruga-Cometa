@@ -2,6 +2,24 @@ package Model;
 
 import java.math.BigDecimal;
 
+
+/**
+ * Classe de Modelo (Model) para a entidade Produto.
+
+ * 1. Gestão de Ativos: Armazena o preço unitário e o saldo em estoque,
+ * servindo de base para o controle de inventário do EntregaBO.
+ * 2. Lógica de Identificação: Implementa o método 'gerarSiglaDoProd', que
+ * cria um prefixo alfanumérico (ex: Monitor LED -> MLD) para compor o código
+ * público do produto.
+ * 3. Precisão Financeira: O uso de 'BigDecimal' assegura a conformidade
+ * contábil do sistema em operações de multiplicação e soma de valores.
+ * 4. Controle de Dependência: O atributo 'emUso' permite que a interface
+ * identifique se o produto está vinculado a entregas, protegendo a integridade
+ * referencial antes de uma exclusão.
+ * 5. Sobrecarga Estratégica: Possui múltiplos construtores para facilitar
+ * a criação de objetos tanto em novos cadastros quanto na recuperação de dados.
+ */
+
 public class Produto {
 
     private Long idProduto;

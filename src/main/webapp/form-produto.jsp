@@ -59,15 +59,10 @@
 </form>
 
 <script>
-    // Função para formatar um número (como 123.45) para a máscara (123,45)
+
     function formatarValorParaMascara(valor) {
         if (!valor || valor === 0) return '0,00';
-
-        // Converte o valor para string com duas casas decimais
-        // Ex: 123.45 -> "123.45"
         var str = parseFloat(valor).toFixed(2);
-
-        // Troca o ponto por vírgula decimal
         str = str.replace('.', ',');
 
         return str;
@@ -94,8 +89,6 @@
             inputPreco.val('');
         }
     });
-
-
 
    function validarProduto() {
        const inputPreco = document.getElementById("preco");

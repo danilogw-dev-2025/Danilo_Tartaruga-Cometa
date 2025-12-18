@@ -12,6 +12,19 @@ import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+/**
+ * Servlet de Integração com API REST (ViaCEP).
+ * 1. Consumo de WebService: Utiliza 'HttpURLConnection' para realizar chamadas
+ * GET síncronas ao servidor do ViaCEP, atuando como um intermediário (Proxy).
+ * 2. Higienização de Parâmetros: Aplica regex para garantir que apenas números
+ * sejam enviados à API, prevenindo erros de formato no request.
+ * 3. Gestão de Timeouts: Define limites de conexão e leitura (5 segundos),
+ * garantindo que o seu sistema não fique travado caso o serviço externo esteja instável.
+ * 4. Resposta em JSON: Define 'application/json' como o tipo de conteúdo,
+ * facilitando o parse imediato pelo JavaScript do 'form-cliente.jsp'.
+ * 5. Tratamento de Erros HTTP: Mapeia códigos de resposta (como 404 ou 500)
+ * e devolve um objeto JSON de erro padronizado para o usuário.
+ */
 
 @WebServlet("/BuscaCepServlet")
 public class BuscaCepServlet extends HttpServlet {

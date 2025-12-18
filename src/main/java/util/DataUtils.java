@@ -18,7 +18,6 @@ public class DataUtils {
             DateTimeFormatter formatoSaida = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             return data.format(formatoSaida);
         } catch (Exception e) {
-            // Logar o erro se necessário.
             return dataString;
         }
     }

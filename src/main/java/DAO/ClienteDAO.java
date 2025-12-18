@@ -10,6 +10,19 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+
+/**
+ * Camada de Acesso a Dados (DAO) para a entidade Cliente.
+ * 1. Controle Transacional: No cadastro, utiliza 'conn.setAutoCommit(false)' para
+ * garantir que a inserção e a geração do 'CODIGO_CLIENTE' (Sigla + ID) ocorram como uma única operação atômica.
+ * 2. Segurança: Implementa 'PreparedStatement' em todos os métodos para prevenir
+ * ataques de SQL Injection.
+ * 3. Integridade Referencial: O metodo 'possuiEntregasPendentes' atua como uma
+ * trava de segurança antes da exclusão, verificando dependências na tabela de entregas.
+ * 4. Mapeamento Objeto-Relacional (ORM Manual): Converte linhas do ResultSet
+ * em instâncias da classe Model Cliente, desacoplando o SQL do restante do sistema.
+ */
+
 public class ClienteDAO {
 
     public void cadastrarCliente(Cliente cliente) {
@@ -40,7 +53,6 @@ public class ClienteDAO {
                     String sigla = cliente.gerarSiglaDoNome();
                     String codigoFinal = String.format("%s%05d", sigla, idGerado);
 
-                    // Update para gravar o código automático
                     String sqlUpdate = "UPDATE TB_CLIENTE SET CODIGO_CLIENTE = ? WHERE ID_CLIENTE = ?";
                     try (PreparedStatement stmtUpdate = conn.prepareStatement(sqlUpdate)) {
                         stmtUpdate.setString(1, codigoFinal);
@@ -48,7 +60,6 @@ public class ClienteDAO {
                         stmtUpdate.executeUpdate();
                     }
 
-                    // Atualiza o objeto para o Servlet poder usar depois
                     cliente.setCodigoCliente(codigoFinal);
                     cliente.setIdCliente(idGerado);
                 }
@@ -56,7 +67,7 @@ public class ClienteDAO {
                 conn.commit();
 
             } catch (SQLException e) {
-                conn.rollback(); // Se falhar o update, desfaz o insert
+                conn.rollback();
                 throw e;
             }
         } catch (SQLException e) {
@@ -119,9 +130,9 @@ public class ClienteDAO {
                     cliente.setNumeroCasa(rs.getInt("NUMERO_CASA"));
                     cliente.setCep(rs.getString("CEP"));
 
-                    return cliente; // <-- retorna o objeto aqui
+                    return cliente;
                 } else {
-                    return null; // <-- não encontrado
+                    return null;
                 }
             }
 
